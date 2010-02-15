@@ -1,0 +1,48 @@
+
+PROJECT(trajectory_follower)
+
+cmake_minimum_required(VERSION 2.6)
+
+#add definitions, compiler switches, etc.
+ADD_DEFINITIONS(-Wall)
+
+#list all source files here
+#ADD_EXECUTABLE(driver main.cpp interface.cpp)
+find_package(PkgConfig)
+
+pkg_check_modules(BASE_TYPES REQUIRED "base-types")
+INCLUDE_DIRECTORIES(${BASE_TYPES_INCLUDE_DIRS})
+LINK_DIRECTORIES(${BASE_TYPES_LIBRARY_DIRS})
+
+INCLUDE_DIRECTORIES(/usr/include/eigen2)
+
+ADD_LIBRARY(trajectory_follower SHARED 
+	    NURBSCurve3D.cc 
+	    TrajectoryController_NoOrientation.cpp 
+	    rk4_sim.cpp 
+	    simpleintegrator.cpp 
+	    TrajectoryController_P.cpp
+	    TrajectoryController_PI.cpp)
+#TARGET_LINK_LIBRARIES(xsens xsensVendorLib) 
+#${DFKI_TYPES_LIBS})
+
+#need to link to some other libraries ? just add them here
+#TARGET_LINK_LIBRARIES(driver png jpeg)
+
+#ADD_EXECUTABLE(TrajectoryFollowerTest TrajectoryFollowerTest.cpp)
+#TARGET_LINK_LIBRARIES(TrajectoryFollowerTest trajectory_follower)
+ 
+CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
+ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
+INSTALL(TARGETS trajectory_follower
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib)
+INSTALL(FILES  
+	NURBSCurve3D.hh 
+	TrajectoryController_NoOrientation.h 
+	TrajectoryController_P.hpp
+	TrajectoryController_PI.h
+	DESTINATION include)
+
+CONFIGURE_FILE(trajectory_follower.pc.in trajectory_follower.pc @ONLY)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/trajectory_follower.pc DESTINATION lib/pkgconfig)
