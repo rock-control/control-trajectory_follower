@@ -20,14 +20,9 @@ ADD_LIBRARY(trajectory_follower SHARED
 	    simpleintegrator.cpp 
 	    TrajectoryController_P.cpp
 	    TrajectoryController_PI.cpp)
-#TARGET_LINK_LIBRARIES(xsens xsensVendorLib) 
-#${DFKI_TYPES_LIBS})
 
-#need to link to some other libraries ? just add them here
-#TARGET_LINK_LIBRARIES(driver png jpeg)
-
-#ADD_EXECUTABLE(TrajectoryFollowerTest TrajectoryFollowerTest.cpp)
-#TARGET_LINK_LIBRARIES(TrajectoryFollowerTest trajectory_follower)
+TARGET_LINK_LIBRARIES(trajectory_follower 
+                      ${BASE_LIBRARIES})
  
 CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
 ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
