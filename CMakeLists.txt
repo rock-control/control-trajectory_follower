@@ -40,7 +40,7 @@ INSTALL(TARGETS trajectory_follower
 INSTALL(FILES  
 	NURBSCurve3D.hh 
 	TrajectoryController_NoOrientation.h 
-	TrajectoryController_P.hpp
+	TrajectoryController_P.h
 	TrajectoryController_PI.h
 	DESTINATION include)
 
