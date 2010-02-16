@@ -23,7 +23,7 @@
  */
 
 // Include Files
-#include "rk4_sim.h"
+#include "rk4_integrator.hpp"
 
 
 // Define this macro if you want to use this utility without linking
