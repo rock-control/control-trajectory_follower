@@ -25,8 +25,8 @@ TrajectoryController_PI::TrajectoryController_PI ()
 {
 }  /* -----  end of method TrajectoryController_PI::TrajectoryController_PI  (constructor)  ----- */
 
-
-TrajectoryController_PI::TrajectoryController_PI (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul, double ll)
+	void
+TrajectoryController_PI::setConstants (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul, double ll)
 {
 	K0 = K0_val;
 	K2 = K2_val;

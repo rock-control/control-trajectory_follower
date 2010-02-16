@@ -25,8 +25,8 @@ TrajectoryController_P::TrajectoryController_P ()
 {
 }  /* -----  end of method TrajectoryController_P::TrajectoryController_P  (constructor)  ----- */
 
-
-TrajectoryController_P::TrajectoryController_P (double K2_val, double K3_val, double R_val, double r_val, double ul, double ll)
+	void
+TrajectoryController_P::setConstants(double K2_val, double K3_val, double R_val, double r_val, double ul, double ll)
 {
 	K2 = K2_val;
 	K3 = K3_val;

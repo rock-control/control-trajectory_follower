@@ -23,11 +23,11 @@ using namespace TrajectoryController;
 
 TrajectoryController_NoOrientation::TrajectoryController_NoOrientation ()
 {
-//	this(10, 0.01, 1, 0.5, 0.02);
 }  /* -----  end of method TrajectoryController_NoOrientation::TrajectoryController_NoOrientation  (constructor)  ----- */
 
 
-TrajectoryController_NoOrientation::TrajectoryController_NoOrientation (float l1_val, float K0_val, float R_val, float r_val, double ul, double ll)
+	void 
+TrajectoryController_NoOrientation::setConstants(float l1_val, float K0_val, float R_val, float r_val, double ul, double ll)
 {
 	l1 = l1_val;
 	K0 = K0_val;

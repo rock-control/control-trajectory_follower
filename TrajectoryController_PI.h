@@ -18,13 +18,13 @@
  */
 
 
-#ifndef  TRAJECTORYCONTROLLER_INC
-#define  TRAJECTORYCONTROLLER_INC
+#ifndef  TRAJECTORYCONTROLLER_PI_INC
+#define  TRAJECTORYCONTROLLER_PI_INC
 
 #include <math.h>
 #include <iostream>
 #include <eigen2/Eigen/Core>
-#include "simpleintegrator.h"
+#include "simpleintegrator.hpp"
 
 namespace TrajectoryController{
 
@@ -39,13 +39,14 @@ namespace TrajectoryController{
 		public:
 			/* ====================  LIFECYCLE     ======================================= */
 			TrajectoryController_PI ();                             /* constructor */
-			TrajectoryController_PI (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul=7.0, double ll=-7.0);
+
 
 			/* ====================  ACCESSORS     ======================================= */
 			double get_vel_right() {return vel_right;};
 			double get_vel_left () {return vel_left; };
 
 			/* ====================  MUTATORS      ======================================= */
+			void setConstants (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul=7.0, double ll=-7.0);
 			Eigen::Vector2d update(double u1, double d_val, double theta_e_val, double c_val, double c_s_val );
 		        double limit ( double val );
 

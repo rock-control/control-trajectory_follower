@@ -38,7 +38,6 @@ namespace TrajectoryController{
 		public:
 			/* ====================  LIFECYCLE     ======================================= */
 			TrajectoryController_NoOrientation ();                             /* constructor */
-			TrajectoryController_NoOrientation (float l1_val, float K0_val, float R_val, float r_val, double ul=7.0, double ll=-7.0);
 
 			/* ====================  ACCESSORS     ======================================= */
 			float k(float theta_e);
@@ -46,6 +45,7 @@ namespace TrajectoryController{
 			float get_vel_left () {return vel_left; };
 
 			/* ====================  MUTATORS      ======================================= */
+			void setConstants(float l1_val, float K0_val, float R_val, float r_val, double ul=7.0, double ll=-7.0);
 			Eigen::Vector2d update(float u1, float d, float theta_e );
         	
    		        double limit ( float val );
