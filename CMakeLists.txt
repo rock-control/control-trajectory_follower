@@ -35,7 +35,6 @@ INSTALL(TARGETS trajectory_follower
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib)
 INSTALL(FILES  
-	NURBSCurve3D.hh 
 	TrajectoryController_NoOrientation.h 
 	TrajectoryController_P.h
 	TrajectoryController_PI.h
