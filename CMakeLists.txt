@@ -19,7 +19,7 @@ INCLUDE_DIRECTORIES(/usr/include/eigen2)
 ADD_LIBRARY(trajectory_follower SHARED 
 	    NURBSCurve3D.cc 
 	    TrajectoryController_NoOrientation.cpp 
-	    rk4_sim.cpp 
+	    rk4_integrator.cpp 
 	    simpleintegrator.cpp 
 	    TrajectoryController_P.cpp
 	    TrajectoryController_PI.cpp)
@@ -42,6 +42,8 @@ INSTALL(FILES
 	TrajectoryController_NoOrientation.h 
 	TrajectoryController_P.h
 	TrajectoryController_PI.h
+	rk4_integrator.hpp 
+	simpleintegrator.hpp 
 	DESTINATION include)
 
 CONFIGURE_FILE(trajectory_follower.pc.in trajectory_follower.pc @ONLY)
