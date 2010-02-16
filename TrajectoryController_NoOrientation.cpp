@@ -27,7 +27,7 @@ TrajectoryController_NoOrientation::TrajectoryController_NoOrientation ()
 }  /* -----  end of method TrajectoryController_NoOrientation::TrajectoryController_NoOrientation  (constructor)  ----- */
 
 
-TrajectoryController_NoOrientation::TrajectoryController_NoOrientation (float l1_val, float K0_val, float R_val, float r_val)
+TrajectoryController_NoOrientation::TrajectoryController_NoOrientation (float l1_val, float K0_val, float R_val, float r_val, double ul, double ll)
 {
 	l1 = l1_val;
 	K0 = K0_val;
@@ -35,8 +35,8 @@ TrajectoryController_NoOrientation::TrajectoryController_NoOrientation (float l1
 	R = R_val;
 	r = r_val;
 
-	u_limit = 7.0; // radians per second
-	l_limit = -7.0; // radians per second 
+	u_limit = ul; // radians per second
+	l_limit = ll; // radians per second 
 } 
 
 
@@ -56,9 +56,8 @@ TrajectoryController_NoOrientation::update (float u1, float d, float theta_e )
 	vel_right = limit((u1 + R*u2) / r);
 	vel_left  = limit((u1 - R*u2) / r);
 
-	return Eigen::Vector2d(vel_right, vel_left);
+	return Eigen::Vector2d(u1, u2);
 }		/* -----  end of method TrajectoryController_NoOrientation::update  ----- */
-
 
 
         double	

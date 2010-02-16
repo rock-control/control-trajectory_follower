@@ -26,7 +26,7 @@ TrajectoryController_PI::TrajectoryController_PI ()
 }  /* -----  end of method TrajectoryController_PI::TrajectoryController_PI  (constructor)  ----- */
 
 
-TrajectoryController_PI::TrajectoryController_PI (double K0_val, double K2_val, double K3_val, double R_val, double r_val)
+TrajectoryController_PI::TrajectoryController_PI (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul, double ll)
 {
 	K0 = K0_val;
 	K2 = K2_val;
@@ -35,10 +35,10 @@ TrajectoryController_PI::TrajectoryController_PI (double K0_val, double K2_val, 
 	R = R_val;
 	r = r_val;
 	
-	u_limit = 7.0; // radians per second
-	l_limit = -7.0; // radians per second 
+	u_limit = ul; // radians per second
+	l_limit = ll; // radians per second 
 
-	z0.init(0.001, 0.0, 0.0);
+	z0.init(samp_time, 0.0, 0.0);
 } 
 
         Eigen::Vector2d	

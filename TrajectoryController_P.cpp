@@ -26,7 +26,7 @@ TrajectoryController_P::TrajectoryController_P ()
 }  /* -----  end of method TrajectoryController_P::TrajectoryController_P  (constructor)  ----- */
 
 
-TrajectoryController_P::TrajectoryController_P (double K2_val, double K3_val, double R_val, double r_val)
+TrajectoryController_P::TrajectoryController_P (double K2_val, double K3_val, double R_val, double r_val, double ul, double ll)
 {
 	K2 = K2_val;
 	K3 = K3_val;
@@ -34,19 +34,13 @@ TrajectoryController_P::TrajectoryController_P (double K2_val, double K3_val, do
 	R = R_val;
 	r = r_val;
 	
-	u_limit = 7.0; // radians per second
-	l_limit = -7.0; // radians per second 
+	u_limit = ul; // radians per second
+	l_limit = ll; // radians per second 
 } 
 
         Eigen::Vector2d	
 TrajectoryController_P::update (double u1, double d, double theta_e, double c, double c_s )
 {
-//	d 		= d_val;
-//	theta_e         = theta_e_val;
-//	c 		= c_val;
-//	c_s     	= c_s_val;
-//	u1 		= u1_val; 
-
  	double d_dot, s_dot, z2, z3, v1, v2, u2;
 
  	d_dot = u1 * sin(theta_e);
@@ -63,7 +57,7 @@ TrajectoryController_P::update (double u1, double d, double theta_e, double c, d
 	vel_right = limit((u1 + R*u2)/r);
 	vel_left  = limit((u1 - R*u2)/r);
 
-	return Eigen::Vector2d(vel_right, vel_left);
+	return Eigen::Vector2d(u1, u2);
 }		/* -----  end of method TrajectoryController_P::update  ----- */
 
 

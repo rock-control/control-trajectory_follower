@@ -39,7 +39,7 @@ namespace TrajectoryController{
 		public:
 			/* ====================  LIFECYCLE     ======================================= */
 			TrajectoryController_PI ();                             /* constructor */
-			TrajectoryController_PI (double K0_val, double K2_val, double K3_val, double R_val, double r_val);
+			TrajectoryController_PI (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul=7.0, double ll=-7.0);
 
 			/* ====================  ACCESSORS     ======================================= */
 			double get_vel_right() {return vel_right;};
