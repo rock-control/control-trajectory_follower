@@ -14,10 +14,7 @@ pkg_check_modules(BASE_TYPES REQUIRED "base-types")
 INCLUDE_DIRECTORIES(${BASE_TYPES_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BASE_TYPES_LIBRARY_DIRS})
 
-INCLUDE_DIRECTORIES(/usr/include/eigen2)
-
 ADD_LIBRARY(trajectory_follower SHARED 
-	    NURBSCurve3D.cc 
 	    TrajectoryController_NoOrientation.cpp 
 	    rk4_integrator.cpp 
 	    simpleintegrator.cpp 
