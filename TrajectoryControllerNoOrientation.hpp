@@ -40,28 +40,28 @@ namespace trajectory_follower{
 			noOrientation ();                             /* constructor */
 
 			/* ====================  ACCESSORS     ======================================= */
-			float k(float theta_e);
-			float get_vel_right() {return vel_right;};
-			float get_vel_left () {return vel_left; };
+			double k(double theta_e);
+			double get_vel_right() {return vel_right;};
+			double get_vel_left () {return vel_left; };
 
 			/* ====================  MUTATORS      ======================================= */
-			void setConstants(float l1_val, float K0_val, float R_val, float r_val, double ul=7.0, double ll=-7.0);
-			Eigen::Vector2d update(float u1, float d, float theta_e );
+			void setConstants(double l1_val, double K0_val, double R_val, double r_val, double ul=7.0, double ll=-7.0);
+			Eigen::Vector2d update(double u1, double d, double theta_e );
         	
-   		        double limit ( float val );
+   		        double limit ( double val );
 
 		protected:
 
 		private:
 
-			float l1;   // position of reference point P(l1,0) on the robot chassis  such that l1u1 > 0
+			double l1;   // position of reference point P(l1,0) on the robot chassis  such that l1u1 > 0
 
-			float vel_left, vel_right;  // velocities of the left side and right side wheels which is the command to the robot
-			float K0; // constant for the calculation of k(d, theta_e)
-			float R;  // distance between wheels
-			float r;  // wheels radius
+			double vel_left, vel_right;  // velocities of the left side and right side wheels which is the command to the robot
+			double K0; // constant for the calculation of k(d, theta_e)
+			double R;  // distance between wheels
+			double r;  // wheels radius
 
-			float u_limit, l_limit;
+			double u_limit, l_limit;
 
 	}; /* -----  end of class noOrientation  ----- */
 
