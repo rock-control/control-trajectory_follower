@@ -17,7 +17,7 @@
  * =====================================================================================
  */
 
-#include "TrajectoryController_NoOrientation.h"
+#include "TrajectoryControllerNoOrientation.hpp"
 
 using namespace TrajectoryController;
 

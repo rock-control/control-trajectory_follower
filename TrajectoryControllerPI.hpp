@@ -24,7 +24,7 @@
 #include <math.h>
 #include <iostream>
 #include <eigen2/Eigen/Core>
-#include "simpleintegrator.hpp"
+#include "SimpleIntegrator.hpp"
 
 namespace TrajectoryController{
 

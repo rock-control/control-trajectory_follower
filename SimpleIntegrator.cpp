@@ -15,7 +15,7 @@
  *
  * =====================================================================================
  */
-#include "simpleintegrator.hpp"
+#include "SimpleIntegrator.hpp"
 
 SimpleIntegrator::SimpleIntegrator() : RK4_SIM(1, 1)
 {

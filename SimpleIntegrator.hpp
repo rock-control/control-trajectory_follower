@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 
-# include "rk4_integrator.hpp"
+#include "RK4Integrator.hpp"
 
 #ifndef  SIMPLEINTEGRATOR_H__INC
 #define  SIMPLEINTEGRATOR_H__INC

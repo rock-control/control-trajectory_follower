@@ -15,11 +15,11 @@ INCLUDE_DIRECTORIES(${BASE_TYPES_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BASE_TYPES_LIBRARY_DIRS})
 
 ADD_LIBRARY(trajectory_follower SHARED 
-	    TrajectoryController_NoOrientation.cpp 
-	    rk4_integrator.cpp 
-	    simpleintegrator.cpp 
-	    TrajectoryController_P.cpp
-	    TrajectoryController_PI.cpp)
+	    TrajectoryControllerNoOrientation.cpp 
+	    RK4Integrator.cpp 
+	    SimpleIntegrator.cpp 
+	    TrajectoryControllerP.cpp
+	    TrajectoryControllerPI.cpp)
 
 TARGET_LINK_LIBRARIES(trajectory_follower 
                       ${BASE_LIBRARIES})
@@ -30,11 +30,11 @@ INSTALL(TARGETS trajectory_follower
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib)
 INSTALL(FILES  
-	TrajectoryController_NoOrientation.h 
-	TrajectoryController_P.h
-	TrajectoryController_PI.h
-	rk4_integrator.hpp 
-	simpleintegrator.hpp 
+	TrajectoryControllerNoOrientation.hpp
+	TrajectoryControllerP.hpp
+	TrajectoryControllerPI.hpp
+	RK4Integrator.hpp 
+	SimpleIntegrator.hpp 
 	DESTINATION include)
 
 CONFIGURE_FILE(trajectory_follower.pc.in trajectory_follower.pc @ONLY)
