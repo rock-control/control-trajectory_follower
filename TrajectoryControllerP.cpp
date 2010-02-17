@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  TrajectoryController_P.cpp
+ *       Filename:  TrajectoryControllerP.cpp
  *
  *    Description:  Implementation of trajectory controller with orientation control
  *    				from 'Springer handbook of robotics' chapter 34 pg 805
@@ -19,14 +19,14 @@
 
 #include "TrajectoryControllerP.hpp"
 
-using namespace TrajectoryController;
+using namespace trajectory_follower;
 
-TrajectoryController_P::TrajectoryController_P ()
+chainedProportional::chainedProportional ()
 {
-}  /* -----  end of method TrajectoryController_P::TrajectoryController_P  (constructor)  ----- */
+}  /* -----  end of method chainedProportional::chainedProportional  (constructor)  ----- */
 
 	void
-TrajectoryController_P::setConstants(double K2_val, double K3_val, double R_val, double r_val, double ul, double ll)
+chainedProportional::setConstants(double K2_val, double K3_val, double R_val, double r_val, double ul, double ll)
 {
 	K2 = K2_val;
 	K3 = K3_val;
@@ -39,7 +39,7 @@ TrajectoryController_P::setConstants(double K2_val, double K3_val, double R_val,
 } 
 
         Eigen::Vector2d	
-TrajectoryController_P::update (double u1, double d, double theta_e, double c, double c_s )
+chainedProportional::update (double u1, double d, double theta_e, double c, double c_s )
 {
  	double d_dot, s_dot, z2, z3, v1, v2, u2;
 
@@ -58,11 +58,11 @@ TrajectoryController_P::update (double u1, double d, double theta_e, double c, d
 	vel_left  = limit((u1 - R*u2)/r);
 
 	return Eigen::Vector2d(u1, u2);
-}		/* -----  end of method TrajectoryController_P::update  ----- */
+}		/* -----  end of method chainedProportional::update  ----- */
 
 
         double	
-TrajectoryController_P::limit ( double val )
+chainedProportional::limit ( double val )
 {
 	if (val > u_limit)
 	    return u_limit;

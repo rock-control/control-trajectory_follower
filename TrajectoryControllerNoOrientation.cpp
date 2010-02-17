@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  TrajectoryController_NoOrientation.cpp
+ *       Filename:  TrajectoryControllerNoOrientation.cpp
  *
  *    Description:  Implementation of trajectory controller without orientation control
  *    				from 'Springer handbook of robotics' chapter 34 pg 805
@@ -19,15 +19,15 @@
 
 #include "TrajectoryControllerNoOrientation.hpp"
 
-using namespace TrajectoryController;
+using namespace trajectory_follower;
 
-TrajectoryController_NoOrientation::TrajectoryController_NoOrientation ()
+noOrientation::noOrientation ()
 {
-}  /* -----  end of method TrajectoryController_NoOrientation::TrajectoryController_NoOrientation  (constructor)  ----- */
+}  /* -----  end of method noOrientation::noOrientation  (constructor)  ----- */
 
 
 	void 
-TrajectoryController_NoOrientation::setConstants(float l1_val, float K0_val, float R_val, float r_val, double ul, double ll)
+noOrientation::setConstants(float l1_val, float K0_val, float R_val, float r_val, double ul, double ll)
 {
 	l1 = l1_val;
 	K0 = K0_val;
@@ -41,15 +41,15 @@ TrajectoryController_NoOrientation::setConstants(float l1_val, float K0_val, flo
 
 
 	float
-TrajectoryController_NoOrientation::k (float theta_e )
+noOrientation::k (float theta_e )
 {
 	// k(d,theta_e) = 0 * cos(theta_e)
 	return K0 * cos(theta_e);
-}		/* -----  end of method TrajectoryController_NoOrientation::k  ----- */
+}		/* -----  end of method noOrientation::k  ----- */
 
 
         Eigen::Vector2d	
-TrajectoryController_NoOrientation::update (float u1, float d, float theta_e )
+noOrientation::update (float u1, float d, float theta_e )
 {
 	double u2 = (-u1*tan(theta_e) / l1) - ( (u1 * k(theta_e) * d) / cos(theta_e));
 
@@ -57,11 +57,11 @@ TrajectoryController_NoOrientation::update (float u1, float d, float theta_e )
 	vel_left  = limit((u1 - R*u2) / r);
 
 	return Eigen::Vector2d(u1, u2);
-}		/* -----  end of method TrajectoryController_NoOrientation::update  ----- */
+}		/* -----  end of method noOrientation::update  ----- */
 
 
         double	
-TrajectoryController_NoOrientation::limit ( float val )
+noOrientation::limit ( float val )
 {
 	if (val > u_limit)
 	    return u_limit;

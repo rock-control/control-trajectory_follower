@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  TrajectoryController_PI.h
+ *       Filename:  TrajectoryControllerPI.hpp
  *
  *    Description:  Implementation of trajectory controller with orientation control
  *    				from 'Springer handbook of robotics' chapter 34 pg 805
@@ -26,19 +26,19 @@
 #include <eigen2/Eigen/Core>
 #include "SimpleIntegrator.hpp"
 
-namespace TrajectoryController{
+namespace trajectory_follower{
 
 	/*
 	 * =====================================================================================
-	 *        Class:  TrajectoryController_PI
+	 *        Class:  chainedProportionalIntegral
 	 *  Description:  
 	 * =====================================================================================
 	 */
-	class TrajectoryController_PI
+	class chainedProportionalIntegral
 	{
 		public:
 			/* ====================  LIFECYCLE     ======================================= */
-			TrajectoryController_PI ();                             /* constructor */
+			chainedProportionalIntegral ();                             /* constructor */
 
 
 			/* ====================  ACCESSORS     ======================================= */
@@ -62,7 +62,7 @@ namespace TrajectoryController{
 			double u_limit, l_limit;
 
 			SimpleIntegrator z0;
-	}; /* -----  end of class TrajectoryController_PI  ----- */
+	}; /* -----  end of class chainedProportionalIntegral  ----- */
 
 
 }

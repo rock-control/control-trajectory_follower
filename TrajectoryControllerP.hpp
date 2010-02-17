@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  TrajectoryController_P.h
+ *       Filename:  TrajectoryControllerP.hpp
  *
  *    Description:  Implementation of trajectory controller with orientation control
  *    				from 'Springer handbook of robotics' chapter 34 pg 805
@@ -25,19 +25,19 @@
 #include <iostream>
 #include <eigen2/Eigen/Core>
 
-namespace TrajectoryController{
+namespace trajectory_follower{
 
 	/*
 	 * =====================================================================================
-	 *        Class:  TrajectoryController_P
+	 *        Class:  chainedProportional
 	 *  Description:  
 	 * =====================================================================================
 	 */
-	class TrajectoryController_P
+	class chainedProportional
 	{
 		public:
 			/* ====================  LIFECYCLE     ======================================= */
-			TrajectoryController_P ();                             /* constructor */
+			chainedProportional ();                             /* constructor */
 
 
 			/* ====================  ACCESSORS     ======================================= */
@@ -59,7 +59,7 @@ namespace TrajectoryController{
 			double r;  // wheels radius
 			double u_limit, l_limit;
 
-	}; /* -----  end of class TrajectoryController_P  ----- */
+	}; /* -----  end of class chainedProportional  ----- */
 
 
 }

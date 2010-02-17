@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  TrajectoryController_NoOrientation.h
+ *       Filename:  TrajectoryControllerNoOrientation.hpp
  *
  *    Description:  Implementation of trajectory controller without orientation control
  *    				from 'Springer handbook of robotics' chapter 34 pg 805
@@ -25,19 +25,19 @@
 #include <iostream>
 #include <eigen2/Eigen/Core>
 
-namespace TrajectoryController{
+namespace trajectory_follower{
 
 	/*
 	 * =====================================================================================
-	 *        Class:  TrajectoryController_NoOrientation
+	 *        Class:  noOrientation
 	 *  Description:  
 	 * =====================================================================================
 	 */
-	class TrajectoryController_NoOrientation
+	class noOrientation
 	{
 		public:
 			/* ====================  LIFECYCLE     ======================================= */
-			TrajectoryController_NoOrientation ();                             /* constructor */
+			noOrientation ();                             /* constructor */
 
 			/* ====================  ACCESSORS     ======================================= */
 			float k(float theta_e);
@@ -63,7 +63,7 @@ namespace TrajectoryController{
 
 			float u_limit, l_limit;
 
-	}; /* -----  end of class TrajectoryController_NoOrientation  ----- */
+	}; /* -----  end of class noOrientation  ----- */
 
 
 }

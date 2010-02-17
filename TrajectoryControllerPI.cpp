@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  TrajectoryController_PI.cpp
+ *       Filename:  TrajectoryControllerPI.cpp
  *
  *    Description:  Implementation of trajectory controller with orientation control
  *    				from 'Springer handbook of robotics' chapter 34 pg 805
@@ -19,14 +19,14 @@
 
 #include "TrajectoryControllerPI.hpp"
 
-using namespace TrajectoryController;
+using namespace trajectory_follower;
 
-TrajectoryController_PI::TrajectoryController_PI ()
+chainedProportionalIntegral::chainedProportionalIntegral ()
 {
-}  /* -----  end of method TrajectoryController_PI::TrajectoryController_PI  (constructor)  ----- */
+}  /* -----  end of method chainedProportionalIntegral::chainedProportionalIntegral  (constructor)  ----- */
 
 	void
-TrajectoryController_PI::setConstants (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul, double ll)
+chainedProportionalIntegral::setConstants (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul, double ll)
 {
 	K0 = K0_val;
 	K2 = K2_val;
@@ -42,7 +42,7 @@ TrajectoryController_PI::setConstants (double K0_val, double K2_val, double K3_v
 } 
 
         Eigen::Vector2d	
-TrajectoryController_PI::update (double u1, double d, double theta_e, double c, double c_s )
+chainedProportionalIntegral::update (double u1, double d, double theta_e, double c, double c_s )
 {
         double d_dot, s_dot, z2, z3, v1, v2, u2;
 
@@ -61,11 +61,11 @@ TrajectoryController_PI::update (double u1, double d, double theta_e, double c, 
 	vel_left  = limit((u1 - R*u2)/r);
 
 	return Eigen::Vector2d(vel_right, vel_left);
-}		/* -----  end of method TrajectoryController_PI::update  ----- */
+}		/* -----  end of method chainedProportionalIntegral::update  ----- */
 
 
         double	
-TrajectoryController_PI::limit ( double val )
+chainedProportionalIntegral::limit ( double val )
 {
 	if (val > u_limit)
 	    return u_limit;
