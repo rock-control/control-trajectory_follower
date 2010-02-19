@@ -74,3 +74,18 @@ chainedProportionalIntegral::limit ( double val )
 	else
 	    return val;
 }
+   	
+	bool
+chainedProportionalIntegral::checkInitialStability( double d, double theta_e, double c, double c_max)
+{
+
+    // HURWITZ conditoin should also be added 
+ 	double z2, z3;
+	z2 = d;
+	z3 = (1.0-(d*c_max))*tan(theta_e);
+
+	if( z2*z2+(z3*z3/(K2-(K0/K3))) < (1/(c_max*c_max)) )
+    	    return true;
+	else 
+	    return false;	    
+}

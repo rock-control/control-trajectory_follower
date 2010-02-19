@@ -49,6 +49,7 @@ namespace trajectory_follower{
 			void setConstants (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul=7.0, double ll=-7.0);
 			Eigen::Vector2d update(double u1, double d_val, double theta_e_val, double c_val, double c_s_val );
 		        double limit ( double val );
+   			bool checkInitialStability(double d , double theta_e, double c, double c_max);
 
 		protected:
 

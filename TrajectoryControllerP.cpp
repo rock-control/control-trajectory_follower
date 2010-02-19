@@ -71,3 +71,16 @@ chainedProportional::limit ( double val )
 	else
 	    return val;
 }
+   	
+	bool
+chainedProportional::checkInitialStability( double d, double theta_e, double c, double c_max)
+{
+ 	double z2, z3;
+	z2 = d;
+	z3 = (1.0-(d*c))*tan(theta_e);
+
+	if( z2*z2+(z3*z3/K2) < (1/(c_max*c_max)) )
+    	    return true;
+	else 
+	    return false;	    
+}
