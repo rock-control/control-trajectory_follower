@@ -51,12 +51,20 @@ noOrientation::k (double theta_e )
         Eigen::Vector2d	
 noOrientation::update (double u1, double d, double theta_e )
 {
-	double u2 = (-u1*tan(theta_e) / l1) - ( (u1 * k(theta_e) * d) / cos(theta_e));
+    	if(checkInstantStability(u1, d, theta_e))
+	{
+	    double u2 = (-u1*tan(theta_e) / l1) - ( (u1 * k(theta_e) * d) / cos(theta_e));
 
-	vel_right = limit((u1 + R*u2) / r);
-	vel_left  = limit((u1 - R*u2) / r);
-
-	return Eigen::Vector2d(u1, u2);
+	    vel_right = limit((u1 + R*u2) / r);
+	    vel_left  = limit((u1 - R*u2) / r);	
+	    
+	    return Eigen::Vector2d(u1, u2);
+	}
+	else 
+	{
+	    vel_right = vel_left = 0.0;
+	    return Eigen::Vector2d(0,0);
+	}
 }		/* -----  end of method noOrientation::update  ----- */
 
 
@@ -69,4 +77,22 @@ noOrientation::limit ( double val )
 	    return l_limit;
 	else
 	    return val;
+}
+
+   	bool
+noOrientation::checkInitialStability( double d, double theta_e, double c_max)
+{
+	if( theta_e > -M_PI_2 && theta_e < M_PI_2 && ((l1*c_max)/(1-fabs(d)*c_max)) < 1)
+    	    return true;
+	else 
+	    return false;	    
+}
+
+   	bool
+noOrientation::checkInstantStability(double u1, double d, double theta_e)
+{
+	if( u1*l1 >= 0.0 && theta_e > -M_PI_2 && theta_e < M_PI_2 )
+    	    return true;
+	else 
+	    return false;	    
 }

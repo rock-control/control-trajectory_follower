@@ -49,6 +49,8 @@ namespace trajectory_follower{
 			Eigen::Vector2d update(double u1, double d, double theta_e );
         	
    		        double limit ( double val );
+   			bool checkInstantStability(double u1, double d, double theta_e);
+   			bool checkInitialStability(double d , double theta_e, double c_max);
 
 		protected:
 
