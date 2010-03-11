@@ -23,6 +23,7 @@ using namespace trajectory_follower;
 
 noOrientation::noOrientation ()
 {
+    bPointTurn = false;
 }  /* -----  end of method noOrientation::noOrientation  (constructor)  ----- */
 
 
@@ -51,20 +52,32 @@ noOrientation::k (double theta_e )
         Eigen::Vector2d	
 noOrientation::update (double u1, double d, double theta_e )
 {
-    	if(checkInstantStability(u1, d, theta_e))
+        double u2;
+    	if(checkInstantStability(u1, d, theta_e) && !bPointTurn)
 	{
-	    double u2 = (-u1*tan(theta_e) / l1) - ( (u1 * k(theta_e) * d) / cos(theta_e));
+	    u2 = (-u1*tan(theta_e) / l1) - ( (u1 * k(theta_e) * d) / cos(theta_e));
 
 	    vel_right = limit((u1 + R*u2) / r);
 	    vel_left  = limit((u1 - R*u2) / r);	
 	    
 	    return Eigen::Vector2d(u1, u2);
 	}
-	else 
+	else
 	{
-	    std::cout << "Robot orientation : OUT OF BOUND" << std::endl;
-	    vel_right = vel_left = 0.0;
-	    return Eigen::Vector2d(0,0);
+	    std::cout << "Robot orientation : OUT OF BOUND.... starting Point-Turn" << std::endl;
+	    bPointTurn = true;
+
+	    if(theta_e > M_PI / 8)
+		u2 = -M_PI;
+	    else if(theta_e < -M_PI / 8)
+		u2 = M_PI;
+	    else 
+		bPointTurn = false;
+
+	    vel_right = limit((R*u2) / r);
+	    vel_left  = limit((R*u2) / r);	
+	    
+	    return Eigen::Vector2d(0.0,u2);
 	}
 }		/* -----  end of method noOrientation::update  ----- */
 

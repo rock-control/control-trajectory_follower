@@ -64,6 +64,7 @@ namespace trajectory_follower{
 			double r;  // wheels radius
 
 			double u_limit, l_limit;
+			bool bPointTurn;
 
 	}; /* -----  end of class noOrientation  ----- */
 
