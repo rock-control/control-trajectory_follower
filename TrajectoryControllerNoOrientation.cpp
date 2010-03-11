@@ -62,6 +62,7 @@ noOrientation::update (double u1, double d, double theta_e )
 	}
 	else 
 	{
+	    std::cout << "Robot orientation : OUT OF BOUND" << std::endl;
 	    vel_right = vel_left = 0.0;
 	    return Eigen::Vector2d(0,0);
 	}
