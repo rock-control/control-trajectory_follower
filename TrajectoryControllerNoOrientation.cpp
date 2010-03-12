@@ -71,8 +71,11 @@ noOrientation::update (double u1, double d, double theta_e )
 		u2 = -M_PI;
 	    else if(theta_e < -M_PI / 8)
 		u2 = M_PI;
-	    else 
+	    else
+	    {	
+	        std::cout << "stopped Point-Turn... switching to normal controller" << std::endl;
 		bPointTurn = false;
+	    }
 
 	    vel_right = limit((R*u2) / r);
 	    vel_left  = limit((R*u2) / r);	
