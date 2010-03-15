@@ -64,21 +64,28 @@ noOrientation::update (double u1, double d, double theta_e )
 	}
 	else
 	{
-	    std::cout << "Robot orientation : OUT OF BOUND.... starting Point-Turn" << std::endl;
-	    bPointTurn = true;
+	    if(!bPointTurn)
+	    {
+		std::cout << "Robot orientation : OUT OF BOUND.... starting Point-Turn" << std::endl;
+		bPointTurn = true;
+	    }
 
 	    if(theta_e > M_PI / 8)
+	    {
 		u2 = -M_PI;
+	    }
 	    else if(theta_e < -M_PI / 8)
+	    {
 		u2 = M_PI;
+	    }
 	    else
 	    {	
 	        std::cout << "stopped Point-Turn... switching to normal controller" << std::endl;
 		bPointTurn = false;
 	    }
 
-	    vel_right = limit((R*u2) / r);
-	    vel_left  = limit((R*u2) / r);	
+	    vel_right = limit( (R*u2) / r);
+	    vel_left  = limit(-(R*u2) / r);	
 	    
 	    return Eigen::Vector2d(0.0,u2);
 	}
