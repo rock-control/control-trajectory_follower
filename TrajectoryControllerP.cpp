@@ -26,16 +26,10 @@ chainedProportional::chainedProportional ()
 }  /* -----  end of method chainedProportional::chainedProportional  (constructor)  ----- */
 
 	void
-chainedProportional::setConstants(double K2_val, double K3_val, double R_val, double r_val, double ul, double ll)
+chainedProportional::setConstants(double K2_val, double K3_val)
 {
 	K2 = K2_val;
 	K3 = K3_val;
-
-	R = R_val;
-	r = r_val;
-	
-	u_limit = ul; // radians per second
-	l_limit = ll; // radians per second 
 } 
 
         Eigen::Vector2d	
@@ -54,25 +48,10 @@ chainedProportional::update (double u1, double d, double theta_e, double c, doub
 
 	u2 = ((v2 + ((d_dot*c + d*c_s*s_dot)*tan(theta_e))) / ((1.0-d*c)*(1+pow(tan(theta_e),2)))) - (s_dot*c);
 
-	vel_right = limit((u1 + R*u2)/r);
-	vel_left  = limit((u1 - R*u2)/r);
-
 	return Eigen::Vector2d(u1, u2);
 }		/* -----  end of method chainedProportional::update  ----- */
-
-
-        double	
-chainedProportional::limit ( double val )
-{
-	if (val > u_limit)
-	    return u_limit;
-	else if (val < l_limit)
-	    return l_limit;
-	else
-	    return val;
-}
-   	
-	bool
+	
+   	bool
 chainedProportional::checkInitialStability( double d, double theta_e, double c, double c_max)
 {
  	double z2, z3;

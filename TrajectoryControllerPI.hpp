@@ -37,30 +37,18 @@ namespace trajectory_follower{
 	class chainedProportionalIntegral
 	{
 		public:
-			/* ====================  LIFECYCLE     ======================================= */
 			chainedProportionalIntegral ();                             /* constructor */
-
-
-			/* ====================  ACCESSORS     ======================================= */
-			double get_vel_right() {return vel_right;};
-			double get_vel_left () {return vel_left; };
-
-			/* ====================  MUTATORS      ======================================= */
-			void setConstants (double K0_val, double K2_val, double K3_val, double R_val, double r_val, double samp_time, double ul=7.0, double ll=-7.0);
+			
+			void setConstants (double K0_val, double K2_val, double K3_val, double samp_time);
 			Eigen::Vector2d update(double u1, double d_val, double theta_e_val, double c_val, double c_s_val );
-		        double limit ( double val );
-   			bool checkInitialStability(double d , double theta_e, double c, double c_max);
+   			
+			bool checkInitialStability(double d , double theta_e, double c, double c_max);
 
 		protected:
 
 		private:
 
-			double vel_left, vel_right;  // velocities of the left side and right side wheels which is the command to the robot
 			double K0, K2, K3; // constant for the controller 
-
-			double R;  // distance between wheels
-			double r;  // wheels radius
-			double u_limit, l_limit;
 
 			SimpleIntegrator z0;
 	}; /* -----  end of class chainedProportionalIntegral  ----- */

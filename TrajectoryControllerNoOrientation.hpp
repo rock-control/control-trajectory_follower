@@ -36,19 +36,13 @@ namespace trajectory_follower{
 	class noOrientation
 	{
 		public:
-			/* ====================  LIFECYCLE     ======================================= */
 			noOrientation ();                             /* constructor */
 
-			/* ====================  ACCESSORS     ======================================= */
 			double k(double theta_e);
-			double get_vel_right() {return vel_right;};
-			double get_vel_left () {return vel_left; };
-
-			/* ====================  MUTATORS      ======================================= */
-			void setConstants(double l1_val, double K0_val, double R_val, double r_val, double ul=7.0, double ll=-7.0);
+			void setConstants(double l1_val, double K0_val);
+			
 			Eigen::Vector2d update(double u1, double d, double theta_e );
         	
-   		        double limit ( double val );
    			bool checkInstantStability(double u1, double d, double theta_e);
    			bool checkInitialStability(double d , double theta_e, double c_max);
 
@@ -57,13 +51,7 @@ namespace trajectory_follower{
 		private:
 
 			double l1;   // position of reference point P(l1,0) on the robot chassis  such that l1u1 > 0
-
-			double vel_left, vel_right;  // velocities of the left side and right side wheels which is the command to the robot
 			double K0; // constant for the calculation of k(d, theta_e)
-			double R;  // distance between wheels
-			double r;  // wheels radius
-
-			double u_limit, l_limit;
 			bool bPointTurn;
 
 	}; /* -----  end of class noOrientation  ----- */
