@@ -1,0 +1,11 @@
+<package>
+    <description brief="trajectory following behaviours">
+    </description>
+    <author>Ajish Babu/ajish.babu@dfki.de</author>
+    <copyright>
+        DFKI/robotik@dfki.de
+    </copyright>
+    <license>LGPL v2 or later</license>
+
+    <depend package="base" />
+</package>
