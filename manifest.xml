@@ -8,4 +8,6 @@
     <license>LGPL v2 or later</license>
 
     <depend package="base" />
+    <!-- we need 'base' to be compiled with sisl support -->
+    <depend package="external/sisl" />
 </package>
