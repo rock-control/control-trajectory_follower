@@ -7,7 +7,7 @@
     </copyright>
     <license>LGPL v2 or later</license>
 
-    <depend package="base" />
+    <depend package="base/types" />
     <!-- we need 'base' to be compiled with sisl support -->
     <depend package="external/sisl" />
 </package>
