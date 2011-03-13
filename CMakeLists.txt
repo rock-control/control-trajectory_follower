@@ -33,7 +33,9 @@ INSTALL(FILES
 	TrajectoryControllerPI.hpp
 	RK4Integrator.hpp 
 	SimpleIntegrator.hpp 
-	DESTINATION include)
+        TrajectoryControllerConfig.hpp
+	DESTINATION include/${PROJECT_NAME}
+        )
 
 CONFIGURE_FILE(trajectory_follower.pc.in trajectory_follower.pc @ONLY)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/trajectory_follower.pc DESTINATION lib/pkgconfig)
