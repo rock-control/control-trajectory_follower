@@ -23,7 +23,7 @@
 
 #include <math.h>
 #include <iostream>
-#include <eigen2/Eigen/Core>
+#include <Eigen/Core>
 
 namespace trajectory_follower{
 

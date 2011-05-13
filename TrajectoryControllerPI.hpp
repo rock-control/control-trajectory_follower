@@ -23,7 +23,7 @@
 
 #include <math.h>
 #include <iostream>
-#include <eigen2/Eigen/Core>
+#include <Eigen/Core>
 #include "SimpleIntegrator.hpp"
 
 namespace trajectory_follower{
