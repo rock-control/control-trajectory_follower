@@ -24,6 +24,7 @@ using namespace trajectory_follower;
 noOrientation::noOrientation ()
 {
     bPointTurn = false;
+    pointTurnSpeed = 0.2;
 }  /* -----  end of method noOrientation::noOrientation  (constructor)  ----- */
 
 
@@ -33,6 +34,11 @@ noOrientation::setConstants(double l1_val, double K0_val)
 	l1 = l1_val;
 	K0 = K0_val;
 } 
+
+void noOrientation::setPointTurnSpeed(double val)
+{
+    pointTurnSpeed = val;
+}
 
 	double
 noOrientation::k (double theta_e )
@@ -61,11 +67,11 @@ noOrientation::update (double u1, double d, double theta_e )
 
 	    if(theta_e > M_PI / 8)
 	    {
-		u2 = -0.2;
+		u2 = -pointTurnSpeed;
 	    }
 	    else if(theta_e < -M_PI / 8)
 	    {
-		u2 = 0.2;
+		u2 = pointTurnSpeed;
 	    }
 	    else
 	    {	

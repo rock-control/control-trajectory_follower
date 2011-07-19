@@ -40,6 +40,7 @@ namespace trajectory_follower{
 
 			double k(double theta_e);
 			void setConstants(double l1_val, double K0_val);
+	                void setPointTurnSpeed(double val);
 			
 			Eigen::Vector2d update(double u1, double d, double theta_e );
         	
@@ -53,7 +54,7 @@ namespace trajectory_follower{
 			double l1;   // position of reference point P(l1,0) on the robot chassis  such that l1u1 > 0
 			double K0; // constant for the calculation of k(d, theta_e)
 			bool bPointTurn;
-
+                	double pointTurnSpeed;
 	}; /* -----  end of class noOrientation  ----- */
 
 
