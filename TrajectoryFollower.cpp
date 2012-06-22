@@ -58,10 +58,14 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
     if ( para < trajectory.spline.getEndParam() )
     {
 
+	double dir = 1.0;
+	if(!trajectory.driveForward())
+	    dir = -1.0;
+	
         if(controllerType == 0)
         {
-            pose.position.x() = pose.position.x() - (forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
-            pose.position.y() = pose.position.y() + (forwardLength + gpsCenterofRotationOffset) * cos(pose.heading);
+            pose.position.x() = pose.position.x() - (dir * forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
+            pose.position.y() = pose.position.y() + (dir * forwardLength + gpsCenterofRotationOffset) * cos(pose.heading);
         }
         else
         {
@@ -87,7 +91,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 	    switch(controllerType)
 	    {
 		case 0:
-		    bInitStable = oTrajController_nO.checkInitialStability(error.d, error.theta_e, trajectory.spline.getCurvatureMax());
+		    bInitStable = oTrajController_nO.checkInitialStability(error.d, dir * error.theta_e, trajectory.spline.getCurvatureMax());
 		    bInitStable = true;
 		    break;
 		case 1:
@@ -111,7 +115,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 	switch(controllerType)
 	{
 	    case 0:
-		motionCmd = oTrajController_nO.update(vel, error.d, error.theta_e); 
+		motionCmd = oTrajController_nO.update(vel, error.d, dir * error.theta_e); 
 		break;
 	    case 1:
 		motionCmd = oTrajController_P.update(vel, error.d, error.theta_e, trajectory.spline.getCurvature(para), trajectory.spline.getVariationOfCurvature(para));
