@@ -60,8 +60,10 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 
 	double dir = 1.0;
 	if(!trajectory.driveForward())
+        {
+            pose.heading  = angleLimit(pose.heading+M_PI);
 	    dir = -1.0;
-	
+        }	
         if(controllerType == 0)
         {
             pose.position.x() = pose.position.x() - (dir * forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
@@ -91,7 +93,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 	    switch(controllerType)
 	    {
 		case 0:
-		    bInitStable = oTrajController_nO.checkInitialStability(error.d, dir * error.theta_e, trajectory.spline.getCurvatureMax());
+		    bInitStable = oTrajController_nO.checkInitialStability(error.d, error.theta_e, trajectory.spline.getCurvatureMax());
 		    bInitStable = true;
 		    break;
 		case 1:
@@ -115,7 +117,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 	switch(controllerType)
 	{
 	    case 0:
-		motionCmd = oTrajController_nO.update(vel, error.d, dir * error.theta_e); 
+		motionCmd = oTrajController_nO.update(vel, error.d, error.theta_e); 
 		break;
 	    case 1:
 		motionCmd = oTrajController_P.update(vel, error.d, error.theta_e, trajectory.spline.getCurvature(para), trajectory.spline.getVariationOfCurvature(para));
@@ -126,6 +128,9 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 	    default:
 		throw std::runtime_error("Got bad controllerType value");
 	}
+
+        std::cout << "\n Mc: " << motionCmd(0) << " " << motionCmd(1) 
+                  << " error: d " <<  error.d << " theta " << error.theta_e << " PI" << std::endl;
     }
     else
     {

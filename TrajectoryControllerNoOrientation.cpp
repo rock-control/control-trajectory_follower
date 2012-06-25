@@ -52,9 +52,14 @@ noOrientation::k (double theta_e )
 noOrientation::update (double u1, double d, double theta_e )
 {
         double u2;
+        int direction;
+        if(u1 >= 0)
+           direction = 1.0;
+        else
+           direction = -1.0;
     	if(checkInstantStability(u1, d, theta_e) && !bPointTurn)
 	{
-	    u2 = (-u1*tan(theta_e) / l1) - ( (u1 * k(theta_e) * d) / cos(theta_e));
+	    u2 = (-u1*tan(theta_e) / (l1*direction) ) - ( (u1 * k(theta_e) * d) / cos(theta_e));
 	    return Eigen::Vector2d(u1, u2);
 	}
 	else
@@ -96,7 +101,7 @@ noOrientation::checkInitialStability( double d, double theta_e, double c_max)
    	bool
 noOrientation::checkInstantStability(double u1, double d, double theta_e)
 {
-	if( u1*l1 >= 0.0 && theta_e > -M_PI_2 && theta_e < M_PI_2 )
+	if( theta_e > -M_PI_2 && theta_e < M_PI_2 )
     	    return true;
 	else 
 	    return false;	    
