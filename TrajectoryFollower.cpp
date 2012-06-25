@@ -66,13 +66,21 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
         }	
         if(controllerType == 0)
         {
-            pose.position.x() = pose.position.x() - (dir * forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
-            pose.position.y() = pose.position.y() + (dir * forwardLength + gpsCenterofRotationOffset) * cos(pose.heading);
+            // y-forward
+//            pose.position.x() = pose.position.x() - (dir * forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
+//            pose.position.y() = pose.position.y() + (dir * forwardLength + gpsCenterofRotationOffset) * cos(pose.heading);
+            // new: x-forward
+            pose.position.x() = pose.position.x() - (dir * forwardLength + gpsCenterofRotationOffset) * cos(pose.heading);
+            pose.position.y() = pose.position.y() + (dir * forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
         }
         else
         {
-            pose.position.x() = pose.position.x() - (gpsCenterofRotationOffset) * sin(pose.heading);
-            pose.position.y() = pose.position.y() + (gpsCenterofRotationOffset) * cos(pose.heading);
+            // y-forward
+//            pose.position.x() = pose.position.x() - (gpsCenterofRotationOffset) * sin(pose.heading);
+//            pose.position.y() = pose.position.y() + (gpsCenterofRotationOffset) * cos(pose.heading);
+            // new: x-forward
+            pose.position.x() = pose.position.x() - (gpsCenterofRotationOffset) * cos(pose.heading);
+            pose.position.y() = pose.position.y() + (gpsCenterofRotationOffset) * sin(pose.heading);
         }
 
         Eigen::Vector3d vError = trajectory.spline.poseError(pose.position, pose.heading, para);
