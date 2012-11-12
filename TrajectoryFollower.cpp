@@ -1,4 +1,5 @@
 #include "TrajectoryFollower.hpp"
+#include <base/logging.h>
 
 namespace trajectory_follower {
 
@@ -108,7 +109,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 
             if (!bInitStable)
             {
-                std::cout << "Trajectory controller: failed initial stability test";
+                LOG_DEBUG_S << "Trajectory controller: failed initial stability test";
                 return INITIAL_STABILITY_FAILED;
             }
         }
@@ -129,14 +130,14 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 		throw std::runtime_error("Got bad controllerType value");
 	}
 
-        std::cout << "\n Mc: " << motionCmd(0) << " " << motionCmd(1) 
+	LOG_DEBUG_S << "\n Mc: " << motionCmd(0) << " " << motionCmd(1) 
                   << " error: d " <<  error.d << " theta " << error.theta_e << " PI" << std::endl;
     }
     else
     {
 	if(status != REACHED_TRAJECTORY_END)
 	{
-	    std::cout << "Reached end of trajectory" << std::endl;
+	    LOG_INFO_S << "Reached end of trajectory" << std::endl;
 	    status = REACHED_TRAJECTORY_END;
 	}
 	return REACHED_TRAJECTORY_END;
@@ -144,7 +145,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 
     if(status != RUNNING)
     {
-	std::cout << "Started to follow trajectory" << std::endl;
+	LOG_INFO_S << "Started to follow trajectory" << std::endl;
 	status = RUNNING;
     }
 
