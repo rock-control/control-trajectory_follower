@@ -70,6 +70,15 @@ public:
     {
 	return oTrajController_PI;
     }
+
+    /**
+     * By default it is assumed that the x-axis of the robot's frame is pointing to the
+     * front of the robot. So, if the y-axis should be the 'front-axis' PI / 2.0 has to be
+     * passed here.
+     */
+    inline void setAddPoseErrorY(double rot_rad) {
+        addPoseErrorY = rot_rad;
+    }
     
 private:
     bool bInitStable;
@@ -92,7 +101,11 @@ private:
     //only class members for debug reasons
     TrajError error;
     CurvePoint curvePoint;
-    RobotPose pose;    
+    RobotPose pose;
+
+    double addPoseErrorY;   
+
+    TrajectoryFollower() {}
 };
 
 }

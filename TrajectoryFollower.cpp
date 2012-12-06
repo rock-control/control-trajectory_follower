@@ -11,6 +11,8 @@ TrajectoryFollower::TrajectoryFollower(double forwardLength, double gpsCenterofR
 	controllerType != 1 && 
 	controllerType != 2)
 	throw std::runtime_error("Wrong controller type given (not 0, 1 or 2)");
+
+    addPoseErrorY = 0.0;
 }
 
 void TrajectoryFollower::setNewTrajectory(const base::Trajectory &trajectory)
@@ -80,7 +82,7 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
         para  = vError(2);
        
 	error.d = vError(0);
-        error.theta_e = angleLimit(vError(1) + M_PI_2);
+        error.theta_e = angleLimit(vError(1) + addPoseErrorY);
         error.param = vError(2);
         
         curvePoint.pose.position 	= trajectory.spline.getPoint(para); 	    
