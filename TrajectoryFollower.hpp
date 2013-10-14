@@ -79,6 +79,18 @@ public:
     inline void setAddPoseErrorY(double rot_rad) {
         addPoseErrorY = rot_rad;
     }
+  
+    inline void setNoOrientationPointTurnUpperLimit(double upper_limit) {
+	    oTrajController_nO.setPointTurnUpperLimit(upper_limit);
+	}
+	
+	inline void setNoOrientationPointTurnLowerLimit(double lower_limit) {
+	    oTrajController_nO.setPointTurnLowerLimit(lower_limit);
+	} 
+	
+    inline void setNoOrientationRotationalVelocity(double rotational_velocity) {
+	    oTrajController_nO.setRotationalVelocity(rotational_velocity);
+	} 
     
 private:
     bool bInitStable;

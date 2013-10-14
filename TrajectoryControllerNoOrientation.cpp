@@ -25,6 +25,9 @@ noOrientation::noOrientation ()
 {
     bPointTurn = false;
     pointTurnSpeed = 0.2;
+    rotationalVelocity = 0.0;
+    pointTurnUpperLimit = M_PI_2;
+    pointTurnLowerLimit = M_PI / 8;
 }  /* -----  end of method noOrientation::noOrientation  (constructor)  ----- */
 
 
@@ -51,6 +54,7 @@ noOrientation::k (double theta_e )
         Eigen::Vector2d	
 noOrientation::update (double u1, double d, double theta_e )
 {
+
         double u2;
         int direction;
         if(u1 >= 0)
@@ -60,6 +64,13 @@ noOrientation::update (double u1, double d, double theta_e )
     	if(checkInstantStability(u1, d, theta_e) && !bPointTurn)
 	{
 	    u2 = (-u1*tan(theta_e) / (l1*direction) ) - ( (u1 * k(theta_e) * d) / cos(theta_e));
+	    // Regard pointTurnSpeed borders.
+	    if(rotationalVelocity > 0 && u2 < -rotationalVelocity) {
+	        u2 = -rotationalVelocity;
+	    }
+	    if(rotationalVelocity > 0 && u2 > rotationalVelocity) {
+	        u2 = rotationalVelocity;
+	    }	    
 	    return Eigen::Vector2d(u1, u2);
 	}
 	else
@@ -70,11 +81,11 @@ noOrientation::update (double u1, double d, double theta_e )
 		bPointTurn = true;
 	    }
 
-	    if(theta_e > M_PI / 8)
+	    if(theta_e > pointTurnLowerLimit)
 	    {
 		u2 = -pointTurnSpeed;
 	    }
-	    else if(theta_e < -M_PI / 8)
+	    else if(theta_e < -pointTurnLowerLimit)
 	    {
 		u2 = pointTurnSpeed;
 	    }
@@ -92,17 +103,19 @@ noOrientation::update (double u1, double d, double theta_e )
    	bool
 noOrientation::checkInitialStability( double d, double theta_e, double c_max)
 {
-	if( theta_e > -M_PI_2 && theta_e < M_PI_2 && ((l1*c_max)/(1-fabs(d)*c_max)) < 1)
-    	    return true;
-	else 
-	    return false;	    
+	if( theta_e > -pointTurnUpperLimit && theta_e < pointTurnUpperLimit 
+	        && ((l1*c_max)/(1-fabs(d)*c_max)) < 1) {
+        return true;
+    } else { 
+        return false;	    
+	}
 }
 
    	bool
 noOrientation::checkInstantStability(double u1, double d, double theta_e)
 {
-	if( theta_e > -M_PI_2 && theta_e < M_PI_2 )
-    	    return true;
+	if( theta_e > -pointTurnUpperLimit && theta_e < pointTurnUpperLimit )
+        return true;
 	else 
 	    return false;	    
 }

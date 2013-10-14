@@ -46,6 +46,18 @@ namespace trajectory_follower{
         	
    			bool checkInstantStability(double u1, double d, double theta_e);
    			bool checkInitialStability(double d , double theta_e, double c_max);
+   			
+   			inline void setPointTurnUpperLimit(double upper_limit) {
+   			    pointTurnUpperLimit = upper_limit;
+   			}
+   			
+   			inline void setPointTurnLowerLimit(double lower_limit) {
+   			    pointTurnLowerLimit = lower_limit;
+   			}  
+   			
+   			inline void setRotationalVelocity(double rotational_velocity) {
+   			    rotationalVelocity = rotational_velocity;
+   			}   			
 
 		protected:
 
@@ -54,7 +66,12 @@ namespace trajectory_follower{
 			double l1;   // position of reference point P(l1,0) on the robot chassis  such that l1u1 > 0
 			double K0; // constant for the calculation of k(d, theta_e)
 			bool bPointTurn;
-                	double pointTurnSpeed;
+            double pointTurnSpeed;
+            double rotationalVelocity; // If > 0: defines the upper border of the supported rotational velocity.
+            // If the angle between the front axis of the robot and the goal vector 
+            // exceeds this limit in radians a point turn will be initiated.
+            double pointTurnUpperLimit;  
+            double pointTurnLowerLimit; // Limit to stops the point turn. 
 	}; /* -----  end of class noOrientation  ----- */
 
 
