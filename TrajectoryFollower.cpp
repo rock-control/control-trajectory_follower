@@ -81,6 +81,9 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 
         pose.position += AngleAxisd(pose.heading, Vector3d::UnitZ()) * Vector3d(fwLenght, 0, 0);
        
+        Eigen::Vector3d vError = trajectory.spline.poseError(pose.position, pose.heading, para);
+        para  = vError(2);
+        
 	error.d = vError(0);
         error.theta_e = angleLimit(vError(1) + addPoseErrorY);
         error.param = vError(2);
