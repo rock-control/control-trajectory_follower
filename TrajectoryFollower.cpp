@@ -1,6 +1,8 @@
 #include "TrajectoryFollower.hpp"
 #include <base/logging.h>
 
+using namespace Eigen;
+
 namespace trajectory_follower {
 
 
@@ -67,19 +69,17 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
             pose.heading  = angleLimit(pose.heading+M_PI);
 	    dir = -1.0;
         }	
+        double fwLenght = 0;
         if(controllerType == 0)
         {
-            pose.position.x() = pose.position.x() - (dir * forwardLength + gpsCenterofRotationOffset) * sin(pose.heading);
-            pose.position.y() = pose.position.y() + (dir * forwardLength + gpsCenterofRotationOffset) * cos(pose.heading);
+            fwLenght = dir * forwardLength + gpsCenterofRotationOffset;
         }
         else
         {
-            pose.position.x() = pose.position.x() - (gpsCenterofRotationOffset) * sin(pose.heading);
-            pose.position.y() = pose.position.y() + (gpsCenterofRotationOffset) * cos(pose.heading);
+            fwLenght = dir * gpsCenterofRotationOffset;
         }
 
-        Eigen::Vector3d vError = trajectory.spline.poseError(pose.position, pose.heading, para);
-        para  = vError(2);
+        pose.position += AngleAxisd(pose.heading, Vector3d::UnitZ()) * Vector3d(fwLenght, 0, 0);
        
 	error.d = vError(0);
         error.theta_e = angleLimit(vError(1) + addPoseErrorY);
