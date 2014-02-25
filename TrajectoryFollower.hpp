@@ -41,6 +41,8 @@ public:
      * */
     enum FOLLOWER_STATUS traverseTrajectory(Eigen::Vector2d &motionCmd, const base::Pose &robotPose);
 
+    void setForwardLength(double length);
+    
     const TrajError &getControlError() const
     {
 	return error;

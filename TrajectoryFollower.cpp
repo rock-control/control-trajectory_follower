@@ -40,7 +40,12 @@ double angleLimit(double angle)
     else
      	return angle;
 }
-    
+  
+void TrajectoryFollower::setForwardLength(double length)
+{
+    forwardLength = length;
+}
+  
 enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(Eigen::Vector2d &motionCmd, const base::Pose &robotPose)
 {   
     motionCmd(0) = 0.0; 
@@ -84,8 +89,11 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
         Eigen::Vector3d vError = trajectory.spline.poseError(pose.position, pose.heading, para);
         para  = vError(2);
         
+        //distance error
 	error.d = vError(0);
+        //heading error
         error.theta_e = angleLimit(vError(1) + addPoseErrorY);
+        //spline parameter for traget point on spline
         error.param = vError(2);
         
         curvePoint.pose.position 	= trajectory.spline.getPoint(para); 	    
