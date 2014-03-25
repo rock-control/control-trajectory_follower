@@ -10,4 +10,5 @@
     <depend package="base/types" />
     <!-- we need 'base' to be compiled with sisl support -->
     <depend package="external/sisl" />
+    <tags>stable</tags>
 </package>
