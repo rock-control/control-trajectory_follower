@@ -12,8 +12,9 @@ pkg_check_modules(BASE_TYPES REQUIRED "base-types")
 INCLUDE_DIRECTORIES(${BASE_TYPES_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BASE_TYPES_LIBRARY_DIRS})
 
-ADD_LIBRARY(trajectory_follower SHARED 
+ADD_LIBRARY(trajectory_follower  SHARED 
 	    TrajectoryControllerNoOrientation.cpp 
+            TrajectoryTargetCalculator.cpp
 	    RK4Integrator.cpp  
 	    TrajectoryFollower.cpp
 	    SimpleIntegrator.cpp 
@@ -36,7 +37,8 @@ INSTALL(FILES
 	RK4Integrator.hpp 
 	SimpleIntegrator.hpp 
         TrajectoryControllerConfig.hpp
-	TrajectoryFollowerTypes.hpp
+        TrajectoryFollowerTypes.hpp
+        TrajectoryTargetCalculator.hpp
         DESTINATION include/${PROJECT_NAME}
         )
 
