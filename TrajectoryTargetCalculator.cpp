@@ -63,6 +63,7 @@ trajectory_follower::TrajectoryTargetCalculator::TARGET_CALCULATOR_STATUS trajec
         {
             LOG_INFO_S << "Reached end of trajectory" << std::endl;
             status = REACHED_TRAJECTORY_END;
+            hasTrajectory = false;
         }
         return REACHED_TRAJECTORY_END;
     }
