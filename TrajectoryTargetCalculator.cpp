@@ -61,6 +61,8 @@ trajectory_follower::TrajectoryTargetCalculator::TARGET_CALCULATOR_STATUS trajec
         para =  trajectory.spline.findOneClosestPoint(robotPose.position, 0.001);
     }    
 
+    double distToEndXY = getDistanceXY(robotPose, endPoint);
+    
     if ( para < trajectory.spline.getEndParam() )
     {
         double curParam = trajectory.spline.findOneClosestPoint(robotPose.position, para, 0.001);
@@ -69,15 +71,13 @@ trajectory_follower::TrajectoryTargetCalculator::TARGET_CALCULATOR_STATUS trajec
         //only traverse 'forward' on the trajectory
         if(curParam > para)
             para = curParam;
-            
-        std::pair<double, double> advancedPos = trajectory.spline.advance(para, forwardLength, 0.01);
-        double targetPointParam = advancedPos.first;
-        
-        targetPoint.position = trajectory.spline.getPoint(targetPointParam);         
-        targetPoint.heading = trajectory.spline.getHeading(targetPointParam);
-        targetPointb = targetPoint.position;
     }
-    else
+
+    //check if we reached the end
+    double drivenLength = trajectory.spline.length(trajectory.spline.getStartParam(), para, 0.01);
+    
+    if ( para >= trajectory.spline.getEndParam() ||
+        (trajectoryLength - drivenLength < endReachedDistance && distToEndXY < endReachedDistance))
     {
         if(status != REACHED_TRAJECTORY_END)
         {
@@ -87,6 +87,13 @@ trajectory_follower::TrajectoryTargetCalculator::TARGET_CALCULATOR_STATUS trajec
         }
         return REACHED_TRAJECTORY_END;
     }
+
+    std::pair<double, double> advancedPos = trajectory.spline.advance(para, forwardLength, 0.01);
+    double targetPointParam = advancedPos.first;
+    
+    targetPoint.position = trajectory.spline.getPoint(targetPointParam);         
+    targetPoint.heading = trajectory.spline.getHeading(targetPointParam);
+    targetPointb = targetPoint.position;
 
     if(status != RUNNING)
     {
