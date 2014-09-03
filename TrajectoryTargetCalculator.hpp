@@ -36,22 +36,35 @@ public:
 
     void setForwardLength(double length);
     
+    /**
+     * If the distance between the end point of the spline 
+     * and the robot is below this distance, the trajectory
+     * is considered driven;
+     * */
+    void setEndReachedDistance(double dist);
+    
     const base::Waypoint &getTargetPoint() const
     {
         return targetPoint;
     }
     
 private:
+    double getDistanceXY(const base::Pose &robotPose, const base::Waypoint &wp) const;
+    
     bool newTrajectory;
     bool hasTrajectory;
     base::Trajectory currentTrajectory;
 
     TARGET_CALCULATOR_STATUS status;
     
+    double endReachedDistance;
+    double trajectoryLength;
+    
     double forwardLength;
     double para;
     
     base::Waypoint targetPoint;
+    base::Waypoint endPoint;
 
     double addPoseErrorY;   
 };

@@ -8,12 +8,20 @@ trajectory_follower::TrajectoryTargetCalculator::TrajectoryTargetCalculator(doub
 {
     newTrajectory = false;
     hasTrajectory = false;
+    
+    endReachedDistance = 0;
 }
 
 void trajectory_follower::TrajectoryTargetCalculator::setNewTrajectory(const base::Trajectory& trajectory)
 {
     currentTrajectory = trajectory;
     currentTrajectory.spline.setGeometricResolution(0.001);
+    
+    endPoint.position = currentTrajectory.spline.getEndPoint();         
+    endPoint.heading = currentTrajectory.spline.getHeading(currentTrajectory.spline.getEndParam());
+    
+    trajectoryLength = currentTrajectory.spline.length(currentTrajectory.spline.getStartParam(), currentTrajectory.spline.getEndParam(), 0.01);
+    
     newTrajectory = true;
     hasTrajectory = true;
 }
@@ -27,6 +35,18 @@ void trajectory_follower::TrajectoryTargetCalculator::setForwardLength(double le
 {
     forwardLength = length;
 }
+
+void trajectory_follower::TrajectoryTargetCalculator::setEndReachedDistance(double dist)
+{
+    endReachedDistance = dist;
+}
+
+
+double trajectory_follower::TrajectoryTargetCalculator::getDistanceXY(const base::Pose& robotPose, const base::Waypoint& wp) const
+{
+    return (Eigen::Vector2d(robotPose.position.x(), robotPose.position.y()) - Eigen::Vector2d(wp.position.x(), wp.position.y())).norm();
+}
+
 
 trajectory_follower::TrajectoryTargetCalculator::TARGET_CALCULATOR_STATUS trajectory_follower::TrajectoryTargetCalculator::traverseTrajectory(Eigen::Vector3d& targetPointb, const base::Pose& robotPose)
 {
