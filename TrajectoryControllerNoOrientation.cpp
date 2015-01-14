@@ -93,6 +93,7 @@ noOrientation::update (double u1, double d, double theta_e )
 	    {	
 	        std::cout << "stopped Point-Turn... switching to normal controller" << std::endl;
 		bPointTurn = false;
+		u2 = 0.0;
 	    }
 	    
 	    return Eigen::Vector2d(0.0,u2);
