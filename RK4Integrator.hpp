@@ -10,21 +10,22 @@
  */
 
 // Prevent Multiple Inclusion
-#ifndef RK4_SIM_HH
-#define RK4_SIM_HH
+#ifndef TRAJECTORY_FOLLOWER_RK4_SIM_HH
+#define TRAJECTORY_FOLLOWER_RK4_SIM_HH
 
 // Include Files
 #include <stdlib.h>
 
-// Local Definitions
-#define RK4_SIM_NO_ERROR 0
-#define RK4_SIM_MEM_ERROR 1
-#define RK4_SIM_UNKNOWN_IC_ERROR 2
-
+namespace trajectory_follower
+{
 
 class RK4_SIM
 {
 public:
+  static const int RK4_SIM_NO_ERROR = 0;
+  static const int RK4_SIM_MEM_ERROR = 1;
+  static const int RK4_SIM_UNKNOWN_IC_ERROR = 2;
+
   // Constructor
   // The arguments are self-explanatory
   // If you specify initial conditions, the parameter _initial_state 
@@ -78,6 +79,8 @@ private:
   inline void F3 (void);
   inline void F4 (void);
 };
+
+}
 
 #endif // RK4_SIM_HH
 

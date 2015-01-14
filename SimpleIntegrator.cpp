@@ -17,6 +17,8 @@
  */
 #include "SimpleIntegrator.hpp"
 
+using namespace trajectory_follower;
+
 SimpleIntegrator::SimpleIntegrator() : RK4_SIM(1, 1)
 {
 }  /* -----  end of method VelocityIntegrator::VelocityIntegrator  (constructor)  ----- */

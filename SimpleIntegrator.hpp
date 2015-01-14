@@ -18,8 +18,11 @@
 
 #include "RK4Integrator.hpp"
 
-#ifndef  SIMPLEINTEGRATOR_H__INC
-#define  SIMPLEINTEGRATOR_H__INC
+#ifndef  TRAJECTORY_FOLLOWER_SIMPLEINTEGRATOR_H__INC
+#define  TRAJECTORY_FOLLOWER_SIMPLEINTEGRATOR_H__INC
+
+namespace trajectory_follower
+{
 
 /*
  * =====================================================================================
@@ -47,5 +50,6 @@ class SimpleIntegrator : public RK4_SIM
 	private:
 }; /* -----  end of class VelocityPositionEstimator  ----- */
 
+}
 
 #endif   /* ----- #ifndef SIMPLEINTEGRATOR_H__INC  ----- */

@@ -37,6 +37,7 @@
 #include "rcs_prnt.hh"          /* rcs_print_ functions */
 #endif
 
+using namespace trajectory_follower;
 
 /*************************************************************/
 
