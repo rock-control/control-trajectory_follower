@@ -18,6 +18,7 @@
  */
 
 #include "TrajectoryControllerNoOrientation.hpp"
+#include <stdexcept>
 
 using namespace trajectory_follower;
 
@@ -34,6 +35,9 @@ noOrientation::noOrientation ()
 	void 
 noOrientation::setConstants(double l1_val, double K0_val)
 {
+	if( !(l1_val > 0) )
+	    throw std::runtime_error("l1 value must be greater than zero.");
+
 	l1 = l1_val;
 	K0 = K0_val;
 } 
