@@ -143,8 +143,8 @@ enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(
 		throw std::runtime_error("Got bad controllerType value");
 	}
 
-	LOG_DEBUG_S << "\n Mc: " << motionCmd(0) << " " << motionCmd(1) 
-                  << " error: d " <<  error.d << " theta " << error.theta_e << " PI" << std::endl;
+	LOG_DEBUG_S << "Mc: " << motionCmd(0) << " " << motionCmd(1) 
+                  << " error: d " <<  error.d << " theta " << error.theta_e << " PI";
     }
     else
     {

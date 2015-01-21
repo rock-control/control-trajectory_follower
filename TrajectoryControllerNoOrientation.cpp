@@ -18,6 +18,7 @@
  */
 
 #include "TrajectoryControllerNoOrientation.hpp"
+#include <base/Logging.hpp>
 #include <stdexcept>
 
 using namespace trajectory_follower;
@@ -60,7 +61,7 @@ noOrientation::update (double u1, double d, double theta_e )
 {
 
         double u2;
-        int direction;
+        double direction;
         if(u1 >= 0)
            direction = 1.0;
         else
@@ -81,7 +82,7 @@ noOrientation::update (double u1, double d, double theta_e )
 	{
 	    if(!bPointTurn)
 	    {
-		std::cout << "Robot orientation : OUT OF BOUND.... starting Point-Turn" << std::endl;
+		LOG_INFO_S << "Robot orientation : OUT OF BOUND. Starting Point-Turn";
 		bPointTurn = true;
 	    }
 
@@ -95,7 +96,7 @@ noOrientation::update (double u1, double d, double theta_e )
 	    }
 	    else
 	    {	
-	        std::cout << "stopped Point-Turn... switching to normal controller" << std::endl;
+	        LOG_INFO_S << "stopped Point-Turn. Switching to normal controller";
 		bPointTurn = false;
 		u2 = 0.0;
 	    }
