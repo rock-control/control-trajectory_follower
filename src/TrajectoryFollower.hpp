@@ -1,10 +1,6 @@
 #ifndef TRAJECTORYFOLLOWER_HPP
 #define TRAJECTORYFOLLOWER_HPP
 
-#include <base/Trajectory.hpp>
-#include <base/commands/Motion2D.hpp>
-#include <base/Pose.hpp>
-
 #include "TrajectoryFollowerTypes.hpp"
 #include "NoOrientationController.hpp"
 #include "ChainedController.hpp"

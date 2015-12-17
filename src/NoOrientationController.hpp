@@ -17,14 +17,9 @@
  * =====================================================================================
  */
 
-
 #ifndef  TRAJECTORYCONTROLLER_NOORIENTATION_INC
 #define  TRAJECTORYCONTROLLER_NOORIENTATION_INC
 
-#include <math.h>
-#include <iostream>
-#include <Eigen/Core>
-#include <base/commands/Motion2D.hpp>
 #include "TrajectoryFollowerTypes.hpp"
 
 namespace trajectory_follower

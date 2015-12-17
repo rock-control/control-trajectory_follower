@@ -19,7 +19,6 @@
 
 #include "NoOrientationController.hpp"
 #include <base/Logging.hpp>
-#include <stdexcept>
 
 using namespace trajectory_follower;
 

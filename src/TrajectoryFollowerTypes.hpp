@@ -1,7 +1,10 @@
 #ifndef TRAJECTORY_FOLLOWER_TYPES_HPP
 #define TRAJECTORY_FOLLOWER_TYPES_HPP
 
-#include <base/pose.h>
+#include <base/Pose.hpp>
+#include <base/commands/Motion2D.hpp>
+#include <base/Trajectory.hpp>
+#include <base/commands/Motion2D.hpp>
 
 namespace trajectory_follower
 {
