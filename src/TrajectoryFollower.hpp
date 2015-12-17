@@ -39,6 +39,8 @@ namespace trajectory_follower
             void computeErrors( const base::Pose& robotPose );
 
             double angleLimit( double angle );
+
+            const FollowerData& getData() { return data; }
         private:
             bool configured;
 
