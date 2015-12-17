@@ -1,5 +1,6 @@
 <package>
-    <description brief="trajectory following behaviours">
+    <description brief="Trajectory Controller for Mobile Robots">
+        Controller which can be used to move a mobile robot on a given spline trajectory. It has two main parts: Reference robot position finder and the controller which tries to minimize the error the reference robot pose given the actual pose.
     </description>
     <author>Ajish Babu/ajish.babu@dfki.de</author>
     <copyright>
@@ -10,5 +11,6 @@
     <depend package="base/types" />
     <!-- we need 'base' to be compiled with sisl support -->
     <depend package="external/sisl" />
-    <tags>stable</tags>
+    <depend package="eigen3" />
+    <!--tags>stable</tags-->
 </package>
