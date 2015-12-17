@@ -1,126 +1,59 @@
 #ifndef TRAJECTORYFOLLOWER_HPP
 #define TRAJECTORYFOLLOWER_HPP
 
-#include <base/trajectory.h>
-#include <base/motion_command.h>
-#include <base/pose.h>
+#include <base/Trajectory.hpp>
+#include <base/commands/Motion2D.hpp>
+#include <base/Pose.hpp>
 
-#include "TrajectoryControllerNoOrientation.hpp"
-#include "TrajectoryControllerP.hpp"
-#include "TrajectoryControllerPI.hpp"
 #include "TrajectoryFollowerTypes.hpp"
+#include "NoOrientationController.hpp"
+#include "ChainedController.hpp"
 
-namespace trajectory_follower {
-
-class TrajectoryFollower
+namespace trajectory_follower 
 {
 
-public:
-    enum FOLLOWER_STATUS
+    class TrajectoryFollower
     {
-	RUNNING,
-	REACHED_TRAJECTORY_END,
-	INITIAL_STABILITY_FAILED,
+        public:
+            TrajectoryFollower();
+            TrajectoryFollower( const ControllerType controllerType_,
+                    const NoOrientationControllerConfig& noOrientationControllerConfig_,
+                    const ChainedControllerConfig& chainedControllerConfig_,
+                    const base::Pose& poseTransform_ );
+
+            /**
+             * Sets a new trajectory
+             */
+            void setNewTrajectory( const base::Trajectory &trajectory_,
+                    const base::Pose& robotPose );
+
+            /**
+             * Marks the current trajectory as traversed
+             */
+            inline void removeTrajectory() 
+            { data.followerStatus = TRAJECTORY_FINISHED; }
+
+            /**
+             * Gerenrates motion commands that should make the robot follow the
+             * trajectory
+             */
+            FollowerStatus traverseTrajectory( base::commands::Motion2D &motionCmd, 
+                    const base::Pose &robotPose );
+
+            void computeErrors( const base::Pose& robotPose );
+
+            double angleLimit( double angle );
+        private:
+            bool configured;
+
+            base::Pose poseTransform;
+            base::Trajectory trajectory;
+
+            ControllerType controllerType;
+            NoOrientationController noOrientationController;
+            ChainedController chainedController;
+
+            FollowerData data;
     };
-
-    TrajectoryFollower(double forwardLength, double gpsCenterofRotationOffset, int controllerType);
-    
-    /**
-     * Sets a new trajectory
-     * **/
-    void setNewTrajectory(const base::Trajectory &trajectory);
-
-    /**
-     * Marks the current trajectory as traversed
-     * */
-    void removeTrajectory();
-    
-    /**
-     * Gerenrates motion commands that should make the robot follow the
-     * trajectory
-     * */
-    enum FOLLOWER_STATUS traverseTrajectory(Eigen::Vector2d &motionCmd, const base::Pose &robotPose);
-
-    void setForwardLength(double length);
-    
-    const TrajError &getControlError() const
-    {
-	return error;
-    }
-
-    const CurvePoint &getCurvePoint() const
-    {
-	return curvePoint;
-    }
-    
-    const RobotPose & getPose() const
-    {
-	return pose;
-    }
-    
-    trajectory_follower::noOrientation &getNoOrientationController()
-    {
-	return oTrajController_nO;
-    }
-
-    trajectory_follower::chainedProportional &getPController()
-    {
-	return oTrajController_P;
-    }
-
-    trajectory_follower::chainedProportionalIntegral &getPIController()
-    {
-	return oTrajController_PI;
-    }
-
-    /**
-     * By default it is assumed that the x-axis of the robot's frame is pointing to the
-     * front of the robot. So, if the y-axis should be the 'front-axis' PI / 2.0 has to be
-     * passed here.
-     */
-    inline void setAddPoseErrorY(double rot_rad) {
-        addPoseErrorY = rot_rad;
-    }
-  
-    inline void setNoOrientationPointTurnUpperLimit(double upper_limit) {
-	    oTrajController_nO.setPointTurnUpperLimit(upper_limit);
-	}
-	
-	inline void setNoOrientationPointTurnLowerLimit(double lower_limit) {
-	    oTrajController_nO.setPointTurnLowerLimit(lower_limit);
-	} 
-	
-    inline void setNoOrientationRotationalVelocity(double rotational_velocity) {
-	    oTrajController_nO.setRotationalVelocity(rotational_velocity);
-	} 
-    
-private:
-    bool bInitStable;
-    bool newTrajectory;
-    bool hasTrajectory;
-    base::Trajectory currentTrajectory;
-
-    FOLLOWER_STATUS status;
-    
-    double forwardLength;
-    double gpsCenterofRotationOffset;
-    int controllerType;
-    
-    double para;
-    
-    trajectory_follower::noOrientation oTrajController_nO;
-    trajectory_follower::chainedProportional oTrajController_P;
-    trajectory_follower::chainedProportionalIntegral oTrajController_PI;
-    
-    //only class members for debug reasons
-    TrajError error;
-    CurvePoint curvePoint;
-    RobotPose pose;
-
-    double addPoseErrorY;   
-
-    TrajectoryFollower() {}
-};
-
 }
 #endif // TRAJECTORYFOLLOWER_HPP

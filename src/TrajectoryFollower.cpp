@@ -1,37 +1,10 @@
 #include "TrajectoryFollower.hpp"
-#include <base/logging.h>
+#include <base/Logging.hpp>
 
 using namespace Eigen;
-
-namespace trajectory_follower {
-
-
-TrajectoryFollower::TrajectoryFollower(double forwardLength, double gpsCenterofRotationOffset, int controllerType):
-    bInitStable(false), newTrajectory(true), hasTrajectory(false), status(REACHED_TRAJECTORY_END), forwardLength(forwardLength), gpsCenterofRotationOffset(gpsCenterofRotationOffset), controllerType(controllerType)
-{
-    if(controllerType != 0 && 
-	controllerType != 1 && 
-	controllerType != 2)
-	throw std::runtime_error("Wrong controller type given (not 0, 1 or 2)");
-
-    addPoseErrorY = 0.0;
-}
-
-void TrajectoryFollower::setNewTrajectory(const base::Trajectory &trajectory)
-{
-    currentTrajectory = trajectory;
-    currentTrajectory.spline.setGeometricResolution(0.001);
-    bInitStable = false;
-    newTrajectory = true;
-    hasTrajectory = true;
-}
+using namespace trajectory_follower;
     
-void TrajectoryFollower::removeTrajectory()
-{
-    hasTrajectory = false;
-}
-    
-double angleLimit(double angle)
+double TrajectoryFollower::angleLimit(double angle)
 {
     if(angle > M_PI)
 	return angle - 2*M_PI;
@@ -40,129 +13,140 @@ double angleLimit(double angle)
     else
      	return angle;
 }
-  
-void TrajectoryFollower::setForwardLength(double length)
+
+TrajectoryFollower::TrajectoryFollower()
+    : configured( false ),
+    controllerType( CONTROLLER_UNKNOWN )
 {
-    forwardLength = length;
+    data.followerStatus = TRAJECTORY_FINISHED;
 }
-  
-enum TrajectoryFollower::FOLLOWER_STATUS TrajectoryFollower::traverseTrajectory(Eigen::Vector2d &motionCmd, const base::Pose &robotPose)
-{   
-    motionCmd(0) = 0.0; 
-    motionCmd(1) = 0.0; 
 
-    if(!hasTrajectory)
-	return REACHED_TRAJECTORY_END;
+TrajectoryFollower::TrajectoryFollower( const ControllerType controllerType_,
+        const NoOrientationControllerConfig& noOrientationControllerConfig_,
+        const ChainedControllerConfig& chainedControllerConfig_,
+        const base::Pose& poseTransform_ = base::Pose() )
+    : configured( false ),
+    controllerType( controllerType_ ),
+    poseTransform( poseTransform_ )
+{
+    data.followerStatus = TRAJECTORY_FINISHED;
 
-    base::Trajectory &trajectory(currentTrajectory);
-
-    if(newTrajectory)
+    if( controllerType == CONTROLLER_NO_ORIENTATION )
     {
-	newTrajectory = false;
-        para =  trajectory.spline.findOneClosestPoint(robotPose.position, 0.001);
-    }    
-
-    pose.position = robotPose.position;
-    pose.heading  = robotPose.getYaw();
-    
-    if ( para < trajectory.spline.getEndParam() )
+        noOrientationController = NoOrientationController( noOrientationControllerConfig_ );
+    }
+    else if( controllerType == CONTROLLER_CHAINED )
     {
-
-	double dir = 1.0;
-	if(!trajectory.driveForward())
-        {
-            pose.heading  = angleLimit(pose.heading+M_PI);
-	    dir = -1.0;
-        }	
-        double fwLenght = 0;
-        if(controllerType == 0)
-        {
-            fwLenght = dir * forwardLength + gpsCenterofRotationOffset;
-        }
-        else
-        {
-            fwLenght = dir * gpsCenterofRotationOffset;
-        }
-
-        pose.position += AngleAxisd(pose.heading, Vector3d::UnitZ()) * Vector3d(fwLenght, 0, 0);
-       
-        Eigen::Vector3d vError = trajectory.spline.poseError(pose.position, pose.heading, para);
-        para  = vError(2);
-        
-        //distance error
-	error.d = vError(0);
-        //heading error
-        error.theta_e = angleLimit(vError(1) + addPoseErrorY);
-        //spline parameter for traget point on spline
-        error.param = vError(2);
-        
-        curvePoint.pose.position 	= trajectory.spline.getPoint(para); 	    
-        curvePoint.pose.heading  	= trajectory.spline.getHeading(para);
-        curvePoint.param 		= para;
-
-	//disable this test for testing, as it seems to be not needed
-	bInitStable = true;
-        if(!bInitStable)
-        {
-	    switch(controllerType)
-	    {
-		case 0:
-		    bInitStable = oTrajController_nO.checkInitialStability(error.d, error.theta_e, trajectory.spline.getCurvatureMax());
-		    bInitStable = true;
-		    break;
-		case 1:
-		    bInitStable = oTrajController_P.checkInitialStability(error.d, error.theta_e, trajectory.spline.getCurvature(para), trajectory.spline.getCurvatureMax());
-		    break;
-		case 2:
-		    bInitStable = oTrajController_PI.checkInitialStability(error.d, error.theta_e, trajectory.spline.getCurvature(para), trajectory.spline.getCurvatureMax());
-		    break;
-		default:
-		    throw std::runtime_error("Got bad controllerType value");
-	    }
-
-            if (!bInitStable)
-            {
-                LOG_DEBUG_S << "Trajectory controller: failed initial stability test";
-                return INITIAL_STABILITY_FAILED;
-            }
-        }
-
-        double vel = currentTrajectory.speed;
-	switch(controllerType)
-	{
-	    case 0:
-		motionCmd = oTrajController_nO.update(vel, error.d, error.theta_e); 
-		break;
-	    case 1:
-		motionCmd = oTrajController_P.update(vel, error.d, error.theta_e, trajectory.spline.getCurvature(para), trajectory.spline.getVariationOfCurvature(para));
-		break;
-	    case 2:
-		motionCmd = oTrajController_PI.update(vel, error.d, error.theta_e, trajectory.spline.getCurvature(para), trajectory.spline.getVariationOfCurvature(para));
-		break;
-	    default:
-		throw std::runtime_error("Got bad controllerType value");
-	}
-
-	LOG_DEBUG_S << "Mc: " << motionCmd(0) << " " << motionCmd(1) 
-                  << " error: d " <<  error.d << " theta " << error.theta_e << " PI";
+        chainedController = ChainedController( chainedControllerConfig_ );
     }
     else
     {
-	if(status != REACHED_TRAJECTORY_END)
-	{
-	    LOG_INFO_S << "Reached end of trajectory" << std::endl;
-	    status = REACHED_TRAJECTORY_END;
-	}
-	return REACHED_TRAJECTORY_END;
+        throw std::runtime_error("Wrong controller type given, it should be  "
+                "either CONTROLLER_NO_ORIENTATION (0) or CONTROLLER_CHAINED (1).");
     }
 
-    if(status != RUNNING)
-    {
-	LOG_INFO_S << "Started to follow trajectory" << std::endl;
-	status = RUNNING;
-    }
-
-    return RUNNING;    
+    configured = true;
 }
 
+void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
+    const base::Pose& robotPose )
+{
+    if( !configured )
+    {
+        throw std::runtime_error("TrajectoryFollower not configured.");
+    }
+
+    trajectory = trajectory_;
+    trajectory.spline.setGeometricResolution( 0.001 );
+    data.curveParameter = trajectory.spline.getStartParam();
+
+    computeErrors( robotPose );
+    if( controllerType == CONTROLLER_NO_ORIENTATION )
+    {
+        noOrientationController.reset();
+        if( !noOrientationController.initialStable( data.distanceError, 
+                    data.angleError, trajectory.spline.getCurvatureMax() )  ) 
+        {
+            data.followerStatus = INITIAL_STABILITY_FAILED;
+            return;
+        }
+
+    }
+    else if( controllerType == CONTROLLER_CHAINED )
+    {
+        chainedController.reset();
+        if( !chainedController.initialStable( data.distanceError, 
+                    data.angleError, 
+                    trajectory.spline.getCurvature( data.curveParameter ),
+                    trajectory.spline.getCurvatureMax() ) )
+        {
+            data.followerStatus = INITIAL_STABILITY_FAILED;
+            return;
+        }
+    }
+
+    data.followerStatus = TRAJECTORY_FOLLOWING;
+}
+  
+void TrajectoryFollower::computeErrors( const base::Pose& robotPose )
+{
+    data.currentPose.fromTransform( poseTransform.toTransform() * robotPose.toTransform() );
+    data.currentHeading = data.currentPose.getYaw();
+    if( !trajectory.driveForward() )
+    {
+        data.currentHeading = angleLimit( data.currentHeading + M_PI );
+    }
+
+    if( controllerType == CONTROLLER_NO_ORIENTATION )
+    {
+        double direction = ( trajectory.driveForward() ? 1 : -1 );
+        data.currentPose.position += AngleAxisd( data.currentHeading, Vector3d::UnitZ() )
+            * Vector3d( direction * noOrientationController.getConfig().l1, 0, 0);
+    }
+
+    Eigen::Vector3d error = trajectory.spline.poseError( data.currentPose.position, 
+            data.currentHeading, data.curveParameter );
+
+    data.distanceError = error(0);
+    data.angleError = error(1);
+    data.curveParameter = error(2);
+
+    data.referenceHeading = trajectory.spline.getHeading( data.curveParameter );
+    data.currentPose.position = trajectory.spline.getPoint( data.curveParameter ); 	    
+    data.currentPose.orientation = AngleAxisd( data.referenceHeading, Vector3d::UnitZ() );
+}
+
+FollowerStatus TrajectoryFollower::traverseTrajectory( 
+        base::commands::Motion2D &motionCmd, 
+        const base::Pose &robotPose )
+{   
+    motionCmd.translation = 0;
+    motionCmd.rotation = 0;
+    if( data.followerStatus != TRAJECTORY_FOLLOWING )
+    {
+        LOG_INFO_S << "Trajectory follower not active";
+        return data.followerStatus;
+    }
+
+    computeErrors( robotPose );
+    if( ! (data.curveParameter < trajectory.spline.getEndParam()) )
+    {
+        data.followerStatus = TRAJECTORY_FINISHED;
+        return data.followerStatus;
+    }
+
+    if( controllerType == CONTROLLER_NO_ORIENTATION )
+    {
+        motionCmd = noOrientationController.update( trajectory.speed, 
+                data.distanceError, data.angleError ); 
+    }
+    else if( controllerType == CONTROLLER_CHAINED )
+    {
+        motionCmd = chainedController.update( trajectory.speed, 
+                data.distanceError, data.angleError, 
+                trajectory.spline.getCurvature( data.curveParameter ),
+                trajectory.spline.getVariationOfCurvature( data.curveParameter ));
+    }
+    
+    return data.followerStatus;    
 }
