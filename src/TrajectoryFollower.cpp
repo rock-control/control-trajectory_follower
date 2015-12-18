@@ -57,7 +57,10 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
     }
 
     trajectory = trajectory_;
-    trajectory.spline.setGeometricResolution( 0.001 );
+    trajectory.spline.setGeometricResolution( 
+            trajectoryConfig.geometricResolution );
+    trajectoryEndPoint = trajectory.spline.getPoint( 
+            trajectory.spline.getEndParam() );
     data.curveParameter = trajectory.spline.getStartParam();
 
     computeErrors( robotPose );
@@ -129,7 +132,26 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     }
 
     computeErrors( robotPose );
-    if( ! (data.curveParameter < trajectory.spline.getEndParam()) )
+
+    double reachedEnd = false;
+    if( base::isUnset< double >( trajectoryConfig.trajectoryFinishDistance ) ) 
+    {
+        if( ! (data.curveParameter < trajectory.spline.getEndParam()) ) 
+        {
+            reachedEnd = true;
+        }
+    }
+    else
+    {
+        if( ( trajectoryEndPoint - data.currentPose.position ).norm() <= 
+                trajectoryConfig.trajectoryFinishDistance ||
+            !( data.curveParameter < trajectory.spline.getEndParam() ) ) 
+        {
+            reachedEnd = true;
+        }
+
+    }
+    if( reachedEnd )
     {
         data.followerStatus = TRAJECTORY_FINISHED;
         return data.followerStatus;

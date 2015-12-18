@@ -41,10 +41,13 @@ namespace trajectory_follower
         private:
             bool configured;
 
-            base::Pose poseTransform;
             base::Trajectory trajectory;
+            base::Vector3d trajectoryEndPoint;
 
+            base::Pose poseTransform;
+            TrajectoryConfig trajectoryConfig;
             ControllerType controllerType;
+
             NoOrientationController noOrientationController;
             ChainedController chainedController;
 
