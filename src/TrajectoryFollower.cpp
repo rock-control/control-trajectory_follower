@@ -137,6 +137,9 @@ void TrajectoryFollower::computeErrors( const base::Pose& robotPose )
 
     // Find the closest point on the curve and gets the distance error and 
     // heading error at this point 
+    //
+    // TODO replace this with a spline segment which is in expected limits and 
+    // find the reference point w.r.t this 
     Eigen::Vector3d error = trajectory.spline.poseError( data.currentPose.position, 
             data.currentHeading, data.curveParameter );
 
