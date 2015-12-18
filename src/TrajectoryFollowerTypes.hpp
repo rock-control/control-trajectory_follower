@@ -8,6 +8,20 @@
 
 namespace trajectory_follower
 {
+    /** Config for finding the reference point in trajectory */
+    struct TrajectoryConfig
+    {
+        double geometricResolution; ///< Geometric resolution to be used
+        double trajectoryFinishDistance; ///< Minimum distance to end point 
+                                         ///< of trajectory for considering it
+                                         ///< to be reached
+                                         
+        TrajectoryConfig()
+            : geometricResolution( 0.001 ),
+            trajectoryFinishDistance( base::unset< double >() )
+        {}
+    };
+
     /** Follower Status */
     enum FollowerStatus
     {
@@ -59,6 +73,21 @@ namespace trajectory_follower
             K2( base::unset< double >() ),
             K3( base::unset< double >() )
         {}
+    };
+
+    /** Combined config */
+    struct FollowerConfig
+    {
+        TrajectoryConfig trajectoryConfig; ///< Trajectory configuration
+        base::Vector6d poseTransform; ///< Transforms robot pose to pose of the 
+                                 ///< robot center of rotation and with 
+                                 ///< x-Forward, y-Left, z-Up coordinate system
+        ControllerType controllerType; ///< Controller type - CONTROLLER_NO_ORIENTATION
+                                 ///< or CONTROLLER_CHAINED
+        NoOrientationControllerConfig noOrientationControllerConfig; ///< Config
+                                 ///< for no_orientation controller
+        ChainedControllerConfig chainedControllerConfig; ///< Config for 
+                                 ///< Chained controller
     };
 
     /** Data for the follower */

@@ -21,23 +21,23 @@ TrajectoryFollower::TrajectoryFollower()
     data.followerStatus = TRAJECTORY_FINISHED;
 }
 
-TrajectoryFollower::TrajectoryFollower( const ControllerType controllerType_,
-        const NoOrientationControllerConfig& noOrientationControllerConfig_,
-        const ChainedControllerConfig& chainedControllerConfig_,
-        const base::Pose& poseTransform_ = base::Pose() )
+TrajectoryFollower::TrajectoryFollower( const FollowerConfig& followerConfig )
     : configured( false ),
-    controllerType( controllerType_ ),
-    poseTransform( poseTransform_ )
+    poseTransform( base::Pose( followerConfig.poseTransform ) ),
+    trajectoryConfig( followerConfig.trajectoryConfig ),
+    controllerType( followerConfig.controllerType )
 {
     data.followerStatus = TRAJECTORY_FINISHED;
 
     if( controllerType == CONTROLLER_NO_ORIENTATION )
     {
-        noOrientationController = NoOrientationController( noOrientationControllerConfig_ );
+        noOrientationController = NoOrientationController( 
+                followerConfig.noOrientationControllerConfig );
     }
     else if( controllerType == CONTROLLER_CHAINED )
     {
-        chainedController = ChainedController( chainedControllerConfig_ );
+        chainedController = ChainedController( 
+                followerConfig.chainedControllerConfig );
     }
     else
     {

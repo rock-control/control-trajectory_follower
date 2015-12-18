@@ -12,10 +12,7 @@ namespace trajectory_follower
     {
         public:
             TrajectoryFollower();
-            TrajectoryFollower( const ControllerType controllerType_,
-                    const NoOrientationControllerConfig& noOrientationControllerConfig_,
-                    const ChainedControllerConfig& chainedControllerConfig_,
-                    const base::Pose& poseTransform_ );
+            TrajectoryFollower( const FollowerConfig& followerConfig );
 
             /**
              * Sets a new trajectory
