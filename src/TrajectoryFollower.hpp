@@ -8,50 +8,68 @@
 namespace trajectory_follower 
 {
 
+    /** 
+     * TrajectoryFollower class combines reference pose finder and 
+     * trajectory controller 
+     **/
     class TrajectoryFollower
     {
         public:
+            /** Default constructor */
             TrajectoryFollower();
+
+            /** Contructor which takes in config. 
+             *
+             * Before using the follower make sure that the object is created
+             * using the correct config and this contructor, otherwise the
+             * controller will cause runtime error */
             TrajectoryFollower( const FollowerConfig& followerConfig );
 
-            /**
-             * Sets a new trajectory
+            /** Sets a new trajectory
+             *
+             * Here it checks for the initial stability of the trajectory 
              */
             void setNewTrajectory( const base::Trajectory &trajectory_,
                     const base::Pose& robotPose );
 
             /**
              * Marks the current trajectory as traversed
+             *
+             * Stops the current trajectory following and removes the trajectory
              */
             inline void removeTrajectory() 
             { data.followerStatus = TRAJECTORY_FINISHED; }
 
             /**
-             * Gerenrates motion commands that should make the robot follow the
+             * Generates motion commands that should make the robot follow the
              * trajectory
              */
             FollowerStatus traverseTrajectory( base::commands::Motion2D &motionCmd, 
                     const base::Pose &robotPose );
 
+            /** Computes the reference pose and the error relative to this pose */
             void computeErrors( const base::Pose& robotPose );
 
+            /** Converts all values to within +/- M_PI */
             double angleLimit( double angle );
 
+            /** Returns the current follower data */
             const FollowerData& getData() { return data; }
+
         private:
-            bool configured;
+            bool configured; ///< True if configured properly
 
-            base::Trajectory trajectory;
-            base::Vector3d trajectoryEndPoint;
+            base::Trajectory trajectory; ///< Active trajectory 
+            base::Vector3d trajectoryEndPoint; ///< End point of the active traj
 
-            base::Pose poseTransform;
-            TrajectoryConfig trajectoryConfig;
-            ControllerType controllerType;
+            base::Pose poseTransform; ///< Transforms robot pose to center of rotation pose
+            TrajectoryConfig trajectoryConfig; ///< Config for trajectory
+            ControllerType controllerType; ///< Controller type
 
-            NoOrientationController noOrientationController;
-            ChainedController chainedController;
+            NoOrientationController noOrientationController; ///< No orientation controller
+            ChainedController chainedController; ///< Chained controller
 
-            FollowerData data;
+            FollowerData data; ///< Follower data
     };
 }
 #endif // TRAJECTORYFOLLOWER_HPP

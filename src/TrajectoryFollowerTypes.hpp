@@ -2,6 +2,7 @@
 #define TRAJECTORY_FOLLOWER_TYPES_HPP
 
 #include <base/Pose.hpp>
+#include <base/Time.hpp>
 #include <base/commands/Motion2D.hpp>
 #include <base/Trajectory.hpp>
 #include <base/commands/Motion2D.hpp>
@@ -93,6 +94,7 @@ namespace trajectory_follower
     /** Data for the follower */
     struct FollowerData
     {
+        base::Time time; ///< Time of the last update
         FollowerStatus followerStatus; ///< Status of trajectory follower
 
         double curveParameter; ///< Current curve parameter
