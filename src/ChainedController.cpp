@@ -53,7 +53,8 @@ void ChainedController::configure( const ChainedControllerConfig& config_ )
     reset();
 }
 
-const base::commands::Motion2D& ChainedController::update( double u1, double d, double theta_e, double c, double c_s )
+const base::commands::Motion2D& ChainedController::update( double u1, 
+        double d, double theta_e, double c, double c_s )
 {
     double d_dot, s_dot, z2, z3, v1, v2, u2;
 
@@ -67,9 +68,11 @@ const base::commands::Motion2D& ChainedController::update( double u1, double d, 
 
     z0 += (v1 * z2);
 
-    v2 = -(fabs(v1)) * config.K0 * z0 + (-v1 * config.K2 * z2) - (fabs(v1) * config.K3 * z3);
+    v2 = -(fabs(v1)) * config.K0 * z0 + (-v1 * config.K2 * z2) - 
+        (fabs(v1) * config.K3 * z3);
 
-    u2 = ((v2 + ((d_dot*c + d*c_s*s_dot)*tan(theta_e))) / ((1.0-d*c)*(1+pow(tan(theta_e),2)))) + (s_dot*c);
+    u2 = ((v2 + ((d_dot*c + d*c_s*s_dot)*tan(theta_e))) / 
+            ((1.0-d*c)*(1+pow(tan(theta_e),2)))) + (s_dot*c);
 
     motionCommand.translation = u1;
     motionCommand.rotation = u2;
@@ -77,7 +80,8 @@ const base::commands::Motion2D& ChainedController::update( double u1, double d, 
     return motionCommand;
 }
 
-bool ChainedController::initialStable( double d, double theta_e, double c, double c_max )
+bool ChainedController::initialStable( double d, double theta_e, double c, 
+        double c_max )
 {
     // HURWITZ condition should also be added 
     double z2, z3;

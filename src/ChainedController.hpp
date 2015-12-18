@@ -37,9 +37,11 @@ namespace trajectory_follower
             void configure( const ChainedControllerConfig& config_ );
             inline void reset() { z0 = 0.0; }
 
-            const base::commands::Motion2D& update( double u1, double d, double theta_e, double c, double c_s );
+            const base::commands::Motion2D& update( double u1, double d, 
+                    double theta_e, double c, double c_s );
 
-            bool initialStable(double d , double theta_e, double c, double c_max);
+            bool initialStable(double d , double theta_e, double c, 
+                    double c_max);
 
         protected:
             ChainedControllerConfig config; ///< Complete config for controller
@@ -47,7 +49,8 @@ namespace trajectory_follower
 
             double z0; ///< Integral term
 
-            base::commands::Motion2D motionCommand; ///< Motion command output of controller
+            base::commands::Motion2D motionCommand; ///< Motion command 
+                                                    ///< output of controller
     };
 }
 

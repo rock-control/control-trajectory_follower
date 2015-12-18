@@ -32,7 +32,8 @@ namespace trajectory_follower
         public:
             /** Constuctor */
             NoOrientationController();
-            NoOrientationController( const NoOrientationControllerConfig& config_ );
+            NoOrientationController( 
+                    const NoOrientationControllerConfig& config_ );
 
             inline const NoOrientationControllerConfig& getConfig() 
             { return config; }

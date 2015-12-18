@@ -28,14 +28,16 @@ NoOrientationController::NoOrientationController()
 {
 }
 
-NoOrientationController::NoOrientationController( const NoOrientationControllerConfig& config_ )
+NoOrientationController::NoOrientationController( 
+        const NoOrientationControllerConfig& config_ )
 : pointTurn( false ),
     configured( false )
 {
     configure( config_ );
 }
 
-void NoOrientationController::configure( const NoOrientationControllerConfig& config_ )
+void NoOrientationController::configure( 
+        const NoOrientationControllerConfig& config_ )
 {
     config = config_;
     if( config.l1 <= 0 )
@@ -50,7 +52,8 @@ void NoOrientationController::configure( const NoOrientationControllerConfig& co
     configured = true;
 }
 
-const base::commands::Motion2D& NoOrientationController::update( double u1, double d, double theta_e )
+const base::commands::Motion2D& NoOrientationController::update( double u1, 
+        double d, double theta_e )
 {
     if( !configured )
     {
@@ -109,7 +112,8 @@ const base::commands::Motion2D& NoOrientationController::update( double u1, doub
     return motionCommand;
 }
 
-bool NoOrientationController::initialStable( double d, double theta_e, double c_max )
+bool NoOrientationController::initialStable( double d, double theta_e, 
+        double c_max )
 {
     if( theta_e > -M_PI / 2.0 && theta_e < M_PI / 2.0
             && ( ( config.l1 * c_max ) / ( 1 - fabs( d ) * c_max ) ) < 1 ) 
