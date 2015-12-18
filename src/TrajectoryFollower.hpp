@@ -60,7 +60,6 @@ namespace trajectory_follower
             bool configured; ///< True if configured properly
 
             base::Trajectory trajectory; ///< Active trajectory 
-            base::Vector3d trajectoryEndPointXY; ///< End point of the active traj
 
             base::Pose poseTransform; ///< Transforms robot pose to center of rotation pose
             TrajectoryConfig trajectoryConfig; ///< Config for trajectory

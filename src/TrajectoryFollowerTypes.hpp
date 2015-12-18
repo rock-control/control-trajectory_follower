@@ -109,13 +109,18 @@ namespace trajectory_follower
 
         base::commands::Motion2D motionCommand; ///< Motion command
 
+        double curveLength; ///< Curve length
+        double distanceToEnd; ///< Distance along curve to end 
+
         FollowerData()
             : followerStatus( TRAJECTORY_FINISHED ),
             curveParameter( base::unset< double >() ),
             referenceHeading( base::unset< double >() ),
             currentHeading( base::unset< double >() ),
             distanceError( base::unset< double >() ),
-            angleError( base::unset< double >() )
+            angleError( base::unset< double >() ),
+            curveLength( base::unset< double >() ),
+            distanceToEnd( base::unset< double >() )
         {
             motionCommand.translation = 0.0;
             motionCommand.rotation = 0.0;

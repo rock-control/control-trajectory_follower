@@ -4,7 +4,7 @@
 using namespace Eigen;
 using namespace trajectory_follower;
     
-double TrajectoryFollower::angleLimit(double angle)
+double TrajectoryFollower::angleLimit( double angle )
 {
     if( angle > M_PI )
 	return angle - 2*M_PI;
@@ -66,14 +66,10 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
     trajectory.spline.setGeometricResolution( 
             trajectoryConfig.geometricResolution );
 
-    // Gets the trajectory end point used for checking if end point reached
-    trajectoryEndPointXY = trajectory.spline.getPoint( 
-            trajectory.spline.getEndParam() );
-    // Z coordinate is being ignored
-    trajectoryEndPointXY.z() = 0;
-
-    // Gets start curve parameter
+    // Curve parameter and length
     data.curveParameter = trajectory.spline.getStartParam();
+    data.curveLength = trajectory.spline.getCurveLength( 
+            trajectoryConfig.geometricResolution );
 
     // Computes the current pose, reference pose and the errors
     computeErrors( robotPose );
@@ -144,8 +140,8 @@ void TrajectoryFollower::computeErrors( const base::Pose& robotPose )
     Eigen::Vector3d error = trajectory.spline.poseError( data.currentPose.position, 
             data.currentHeading, data.curveParameter );
 
-    data.distanceError = error(0); // Distance error
-    data.angleError = error(1); // Heading error
+    data.distanceError  = error(0); // Distance error
+    data.angleError     = error(1); // Heading error
     data.curveParameter = error(2); // Curve parameter of reference point
 
     // Setting reference values
@@ -187,12 +183,10 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     }
     else
     {
-        base::Vector3d currentPoseXY( data.currentPose.position.x(), 
-                data.currentPose.position.y(), 0 );
-        // Curve parameter of the distance to end
-        if( ( trajectoryEndPointXY - currentPoseXY ).norm() <= 
-                trajectoryConfig.trajectoryFinishDistance ||
-            !( data.curveParameter < trajectory.spline.getEndParam() ) ) 
+        // Distance along curve to end point
+        if( fabs( trajectory.spline.getCurveLength( data.curveParameter, 
+                    trajectoryConfig.geometricResolution ) ) <= 
+                trajectoryConfig.trajectoryFinishDistance  ) 
         {
             reachedEnd = true;
         }
