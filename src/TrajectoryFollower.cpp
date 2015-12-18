@@ -61,12 +61,17 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
 
     // Sets the trajectory
     trajectory = trajectory_;
+
     // Sets the geometric resolution
     trajectory.spline.setGeometricResolution( 
             trajectoryConfig.geometricResolution );
+
     // Gets the trajectory end point used for checking if end point reached
-    trajectoryEndPoint = trajectory.spline.getPoint( 
+    trajectoryEndPointXY = trajectory.spline.getPoint( 
             trajectory.spline.getEndParam() );
+    // Z coordinate is being ignored
+    trajectoryEndPointXY.z() = 0;
+
     // Gets start curve parameter
     data.curveParameter = trajectory.spline.getStartParam();
 
@@ -182,8 +187,10 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     }
     else
     {
+        base::Vector3d currentPoseXY( data.currentPose.position.x(), 
+                data.currentPose.position.y(), 0 );
         // Curve parameter of the distance to end
-        if( ( trajectoryEndPoint - data.currentPose.position ).norm() <= 
+        if( ( trajectoryEndPointXY - currentPoseXY ).norm() <= 
                 trajectoryConfig.trajectoryFinishDistance ||
             !( data.curveParameter < trajectory.spline.getEndParam() ) ) 
         {
