@@ -23,10 +23,15 @@ TrajectoryFollower::TrajectoryFollower()
 
 TrajectoryFollower::TrajectoryFollower( const FollowerConfig& followerConfig )
     : configured( false ),
-    poseTransform( base::Pose( followerConfig.poseTransform ) ),
     trajectoryConfig( followerConfig.trajectoryConfig ),
     controllerType( followerConfig.controllerType )
 {
+    poseTransform.setPose( base::Pose( followerConfig.poseTransform ) );
+
+    base::Vector6d rotZ90; 
+    rotZ90 << 0, 0, M_PI, 0, 0, 0;
+    backTransform.setPose( base::Pose( rotZ90 ) );
+
     data.followerStatus = TRAJECTORY_FINISHED;
 
     // Configures the controller according to controller type
@@ -52,7 +57,7 @@ TrajectoryFollower::TrajectoryFollower( const FollowerConfig& followerConfig )
 }
 
 void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
-    const base::Pose& robotPose )
+    const base::samples::RigidBodyState& robotPose )
 {
     if( !configured )
     {
@@ -105,34 +110,38 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
         }
     }
 
+    // Direction
+    direction = ( trajectory.driveForward() ? 1 : -1 );
+
     // Set state as following if stable
     data.followerStatus = TRAJECTORY_FOLLOWING;
 }
   
-void TrajectoryFollower::computeErrors( const base::Pose& robotPose )
+void TrajectoryFollower::computeErrors( const base::samples::RigidBodyState& robotPose )
 {
     // Transform robot pose into pose of the center of rotation
-    data.currentPose.fromTransform( poseTransform.toTransform() * robotPose.toTransform() );
+    if( trajectory.driveForward() )
+    {
+        data.currentPose.setTransform( robotPose.getTransform() * 
+                poseTransform.getTransform() );
+    }
+    else
+    {
+        data.currentPose.setTransform( robotPose.getTransform() * 
+                poseTransform.getTransform() *
+                backTransform.getTransform() );
+    }
 
     // Gets the heading of the current pose
-    data.currentHeading = data.currentPose.getYaw();
-
-    // Change heading based on direction of motion
-    if( !trajectory.driveForward() )
-    {
-        data.currentHeading = angleLimit( data.currentHeading + M_PI );
-    }
+    data.currentHeading = angleLimit( data.currentPose.getYaw() );
 
     // No orientation controller
     if( controllerType == CONTROLLER_NO_ORIENTATION )
     {
-        // Sets direction sign
-        double direction = ( trajectory.driveForward() ? 1 : -1 );
-
         // No orientation controller actual point is offset by given value 
         // and based on direction of movement
         data.currentPose.position += AngleAxisd( data.currentHeading, Vector3d::UnitZ() )
-            * Vector3d( direction * noOrientationController.getConfig().l1, 0, 0);
+            * Vector3d( noOrientationController.getConfig().l1, 0, 0);
     }
 
     // Find the closest point on the curve and gets the distance error and 
@@ -155,7 +164,7 @@ void TrajectoryFollower::computeErrors( const base::Pose& robotPose )
 
 FollowerStatus TrajectoryFollower::traverseTrajectory( 
         base::commands::Motion2D &motionCmd, 
-        const base::Pose &robotPose )
+        const base::samples::RigidBodyState &robotPose )
 {   
     motionCmd.translation = 0;
     motionCmd.rotation = 0;
@@ -186,10 +195,10 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     }
     else
     {
+        data.distanceToEnd = trajectory.spline.getCurveLength( data.curveParameter, 
+                    trajectoryConfig.geometricResolution ); 
         // Distance along curve to end point
-        if( fabs( trajectory.spline.getCurveLength( data.curveParameter, 
-                    trajectoryConfig.geometricResolution ) ) <= 
-                trajectoryConfig.trajectoryFinishDistance  ) 
+        if( data.distanceToEnd <= trajectoryConfig.trajectoryFinishDistance  ) 
         {
             reachedEnd = true;
         }
@@ -210,18 +219,28 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     if( controllerType == CONTROLLER_NO_ORIENTATION )
     {
         // No orientation controller update
-        motionCmd = noOrientationController.update( trajectory.speed, 
+        motionCmd = noOrientationController.update( fabs( trajectory.speed ), 
                 data.distanceError, data.angleError ); 
     }
     else if( controllerType == CONTROLLER_CHAINED )
     {
         // Chained controller update
-        motionCmd = chainedController.update( trajectory.speed, 
+        motionCmd = chainedController.update( fabs( trajectory.speed ), 
                 data.distanceError, 
                 data.angleError, 
                 trajectory.spline.getCurvature( data.curveParameter ),
                 trajectory.spline.getVariationOfCurvature( data.curveParameter ));
     }
+
+    motionCmd.translation = motionCmd.translation * direction;
+    motionCmd.rotation = motionCmd.rotation * direction;
     
+    if( !base::isUnset< double >( trajectoryConfig.maxRotationalVelocity ) )
+    {
+        ///< Sets limits on rotational velocity
+        motionCmd.rotation = std::min( motionCmd.rotation,  trajectoryConfig.maxRotationalVelocity );
+        motionCmd.rotation = std::max( motionCmd.rotation, -trajectoryConfig.maxRotationalVelocity );
+    }        
+
     return data.followerStatus;    
 }

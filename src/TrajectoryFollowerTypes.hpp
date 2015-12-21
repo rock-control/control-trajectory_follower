@@ -1,7 +1,7 @@
 #ifndef TRAJECTORY_FOLLOWER_TYPES_HPP
 #define TRAJECTORY_FOLLOWER_TYPES_HPP
 
-#include <base/Pose.hpp>
+#include <base/samples/RigidBodyState.hpp>
 #include <base/Time.hpp>
 #include <base/commands/Motion2D.hpp>
 #include <base/Trajectory.hpp>
@@ -16,10 +16,13 @@ namespace trajectory_follower
         double trajectoryFinishDistance; ///< Minimum distance to end point 
                                          ///< of trajectory for considering it
                                          ///< to be reached
+        double maxRotationalVelocity; ///< Maximum rotational velocity, NaN if no limit is needed
+
                                          
         TrajectoryConfig()
             : geometricResolution( 0.001 ),
-            trajectoryFinishDistance( base::unset< double >() )
+            trajectoryFinishDistance( base::unset< double >() ),
+            maxRotationalVelocity( base::unset< double >() )
         {}
     };
 
@@ -45,8 +48,6 @@ namespace trajectory_follower
         double l1; ///< Position of reference point P(l1,0) on the robot chassis such that l1u1 > 0
         double K0; ///< Constant for the calculation of k(d, theta_e)
 
-        double maxRotationalVelocity; ///< Maximum rotational velocity, NaN if no limit is needed
-
         double pointTurnStart; ///< Angle error at which point turn starts
         double pointTurnEnd;   ///< Angle error at which point turn, once started, stops
 
@@ -55,7 +56,6 @@ namespace trajectory_follower
         NoOrientationControllerConfig() 
             : l1( base::unset< double >() ),
             K0( base::unset< double >() ),
-            maxRotationalVelocity( base::unset< double >() ),
             pointTurnStart( base::unset< double >() ),
             pointTurnEnd( base::unset< double >() ),
             pointTurnVelocity( base::unset< double >() )
@@ -98,8 +98,8 @@ namespace trajectory_follower
         FollowerStatus followerStatus; ///< Status of trajectory follower
 
         double curveParameter; ///< Current curve parameter
-        base::Pose referencePose; ///< Reference pose of the robot
-        base::Pose currentPose; ///< Current pose of the robot
+        base::samples::RigidBodyState referencePose; ///< Reference pose of the robot
+        base::samples::RigidBodyState currentPose; ///< Current pose of the robot
 
         double referenceHeading; ///< Reference heading
         double currentHeading; ///< Current heading

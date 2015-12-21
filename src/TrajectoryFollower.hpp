@@ -30,7 +30,7 @@ namespace trajectory_follower
              * Here it checks for the initial stability of the trajectory 
              */
             void setNewTrajectory( const base::Trajectory &trajectory_,
-                    const base::Pose& robotPose );
+                    const base::samples::RigidBodyState& robotPose );
 
             /**
              * Marks the current trajectory as traversed
@@ -45,10 +45,10 @@ namespace trajectory_follower
              * trajectory
              */
             FollowerStatus traverseTrajectory( base::commands::Motion2D &motionCmd, 
-                    const base::Pose &robotPose );
+                    const base::samples::RigidBodyState &robotPose );
 
             /** Computes the reference pose and the error relative to this pose */
-            void computeErrors( const base::Pose& robotPose );
+            void computeErrors( const base::samples::RigidBodyState& robotPose );
 
             /** Converts all values to within +/- M_PI */
             double angleLimit( double angle );
@@ -60,8 +60,11 @@ namespace trajectory_follower
             bool configured; ///< True if configured properly
 
             base::Trajectory trajectory; ///< Active trajectory 
+            double direction; ///< 1 for forward, -1 for reverse
 
-            base::Pose poseTransform; ///< Transforms robot pose to center of rotation pose
+            base::samples::RigidBodyState poseTransform; ///< Transforms robot pose to center of rotation pose
+            base::samples::RigidBodyState backTransform; ///< Transforms robot pose to backward rotation
+
             TrajectoryConfig trajectoryConfig; ///< Config for trajectory
             ControllerType controllerType; ///< Controller type
 

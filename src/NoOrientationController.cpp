@@ -61,25 +61,11 @@ const base::commands::Motion2D& NoOrientationController::update( double u1,
     }
 
     double u2;
-    double direction = 1.0;
-    if( u1 < 0 )
-    {
-        // Backward motion
-        direction = -1.0;
-        u1 = fabs( u1 );
-    }
 
     if( checkPointTurn( theta_e ) && !pointTurn )
     {
         // No orientation controller ( Page 806 ), Assuming k(d,theta_e)=K0*cos(theta_e)
         u2 = -u1 * ( tan(theta_e) / config.l1 + d * config.K0 );
-
-        if( !base::isUnset< double >( config.maxRotationalVelocity ) )
-        {
-            ///< Sets limits on rotational velocity
-            u2 = std::min( u2,  config.maxRotationalVelocity );
-            u2 = std::max( u2, -config.maxRotationalVelocity );
-        }        
     }
     else
     {
@@ -106,7 +92,7 @@ const base::commands::Motion2D& NoOrientationController::update( double u1,
         u1 = 0;
     }
 
-    motionCommand.translation = u1 * direction;
+    motionCommand.translation = u1;
     motionCommand.rotation = u2;
 
     return motionCommand;
@@ -115,6 +101,7 @@ const base::commands::Motion2D& NoOrientationController::update( double u1,
 bool NoOrientationController::initialStable( double d, double theta_e, 
         double c_max )
 {
+    return true;
     if( theta_e > -M_PI / 2.0 && theta_e < M_PI / 2.0
             && ( ( config.l1 * c_max ) / ( 1 - fabs( d ) * c_max ) ) < 1 ) 
     {
