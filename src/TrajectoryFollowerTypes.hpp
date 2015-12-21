@@ -1,6 +1,7 @@
 #ifndef TRAJECTORY_FOLLOWER_TYPES_HPP
 #define TRAJECTORY_FOLLOWER_TYPES_HPP
 
+#include <base/Float.hpp>
 #include <base/Pose.hpp>
 #include <base/Time.hpp>
 #include <base/commands/Motion2D.hpp>
