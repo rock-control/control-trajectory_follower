@@ -112,7 +112,8 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
 void TrajectoryFollower::computeErrors( const base::Pose& robotPose )
 {
     // Transform robot pose into pose of the center of rotation
-    data.currentPose.fromTransform( poseTransform.toTransform() * robotPose.toTransform() );
+    //data.currentPose.fromTransform( poseTransform.toTransform() * robotPose.toTransform() );
+    data.currentPose.fromTransform( robotPose.toTransform() * poseTransform.toTransform() );
 
     // Gets the heading of the current pose
     data.currentHeading = data.currentPose.getYaw();
