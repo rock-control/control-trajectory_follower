@@ -55,6 +55,9 @@ namespace trajectory_follower
 
             /** Returns the current follower data */
             const FollowerData& getData() { return data; }
+            
+            inline Eigen::Vector2d getMovementVector() { return movementVector; };
+	    inline base::Trajectory getTrajectorySegment() { return trajectorySegment; };
 
         private:
             bool configured; ///< True if configured properly
@@ -69,6 +72,9 @@ namespace trajectory_follower
             ChainedController chainedController; ///< Chained controller
 
             FollowerData data; ///< Follower data
+            
+            Eigen::Vector2d movementVector;
+	    base::Trajectory trajectorySegment;
     };
 }
 #endif // TRAJECTORYFOLLOWER_HPP

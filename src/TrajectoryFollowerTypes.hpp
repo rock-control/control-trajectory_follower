@@ -6,7 +6,7 @@
 #include <base/Time.hpp>
 #include <base/commands/Motion2D.hpp>
 #include <base/Trajectory.hpp>
-#include <base/commands/Motion2D.hpp>
+#include <base/samples/RigidBodyState.hpp>
 
 namespace trajectory_follower
 {
@@ -99,8 +99,12 @@ namespace trajectory_follower
         FollowerStatus followerStatus; ///< Status of trajectory follower
 
         double curveParameter; ///< Current curve parameter
-        base::Pose referencePose; ///< Reference pose of the robot
-        base::Pose currentPose; ///< Current pose of the robot
+        //base::samples::RigidBodyState referencePose; ///< Reference pose of the robot
+        //base::samples::RigidBodyState currentPose; ///< Current pose of the robot
+        base::Pose referencePose;
+	base::Pose currentPose;
+        
+        //base::Trajectory currentTrajectory;
 
         double referenceHeading; ///< Reference heading
         double currentHeading; ///< Current heading

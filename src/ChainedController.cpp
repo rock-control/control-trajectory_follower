@@ -56,7 +56,7 @@ void ChainedController::configure( const ChainedControllerConfig& config_ )
 const base::commands::Motion2D& ChainedController::update( double u1, 
         double d, double theta_e, double c, double c_s )
 {
-    double d_dot, s_dot, z2, z3, v1, v2, u2;
+    double d_dot, s_dot, z2, z3, v2, u2;
     
     double direction = 1.0;
     if( u1 < 0 )
@@ -72,17 +72,15 @@ const base::commands::Motion2D& ChainedController::update( double u1,
     z2 = d;
     z3 = (1.0-(d*c))*tan(theta_e);
 
-    v1 = u1 * cos(theta_e) / (1.0 - d*c);
+    z0 += (s_dot * z2);
 
-    z0 += (v1 * z2);
-
-    v2 = -(fabs(v1)) * config.K0 * z0 + (-v1 * config.K2 * z2) - 
-        (fabs(v1) * config.K3 * z3);
+    v2 = -(fabs(s_dot)) * config.K0 * z0 + (-s_dot * config.K2 * z2) - 
+        (fabs(s_dot) * config.K3 * z3);
 
     u2 = ((v2 + ((d_dot*c + d*c_s*s_dot)*tan(theta_e))) / 
             ((1.0-d*c)*(1+pow(tan(theta_e),2)))) + (s_dot*c);
 
-    motionCommand.translation = u1 * direction;
+    motionCommand.translation = u1*direction;
     motionCommand.rotation = u2;
 
     return motionCommand;
