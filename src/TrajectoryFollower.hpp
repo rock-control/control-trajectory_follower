@@ -75,6 +75,7 @@ namespace trajectory_follower
             
             Eigen::Vector2d movementVector;
 	    base::Trajectory trajectorySegment;
+	    bool isNewTrajectory;
     };
 }
 #endif // TRAJECTORYFOLLOWER_HPP

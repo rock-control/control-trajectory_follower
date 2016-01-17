@@ -42,6 +42,7 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     }
 
     configured = true;
+    isNewTrajectory = true;
 }
 
 void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
@@ -49,6 +50,8 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
 {
     if(!configured)
         throw std::runtime_error("TrajectoryFollower not configured.");
+
+    isNewTrajectory = true;
 
     // Sets the trajectory
     trajectory = trajectory_;
@@ -109,16 +112,22 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
         data.currentHeading = angleLimit( data.currentHeading + M_PI );
 
     double direction = 1.0;
-    // No orientation controller
-    /*if( controllerType == CONTROLLER_NO_ORIENTATION )
-    {
-    direction = ( trajectory.driveForward() ? 1 : -1 );
+    if(isNewTrajectory) {
+        Eigen::Vector3d error = trajectory.spline.poseError(data.currentPose.position,
+                                data.currentHeading, data.curveParameter);
 
-        // No orientation controller actual point is offset by given value
-        // and based on direction of movement
-        data.currentPose.position += AngleAxisd( data.currentHeading, Vector3d::UnitZ() )
-            * Vector3d( direction * noOrientationController.getConfig().l1, 0, 0);
-    }*/
+        data.distanceError  = error(0); // Distance error
+        data.angleError     = error(1); // Heading error
+        data.curveParameter = error(2); // Curve parameter of reference point
+
+        // Setting reference values
+        data.referenceHeading = trajectory.spline.getHeading( data.curveParameter );
+        data.referencePose.position = trajectory.spline.getPoint( data.curveParameter );
+        data.referencePose.orientation = AngleAxisd( data.referenceHeading, Vector3d::UnitZ() );
+	
+	isNewTrajectory = false;
+	return;
+    }
 
     movementVector = lastRobotPose.position.head(2) - data.currentPose.position.head(2);
     double movementDirection = atan2(movementVector.y(), movementVector.x());
