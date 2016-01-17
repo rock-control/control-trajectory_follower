@@ -5,4 +5,5 @@ templates/*
 build/*
 
 *autobuild-stamp
-
+.kdev4/*
+*.kdev4
