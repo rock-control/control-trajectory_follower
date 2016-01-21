@@ -151,11 +151,15 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     Eigen::Vector3d curPos(data.currentPose.position);
     curPos.z() = 0;
 
-    double newCurveParam = data.trajectorySegment.spline.localClosestPointSearch(curPos, guess, start, end, 0.0001);
+    double newCurveParam = trajectory.spline.localClosestPointSearch(curPos, guess, start, end, 0.0001);
 
-    // debug output
-    data.trajectorySegment = trajectory;
-    data.trajectorySegment.spline.crop(start, end);
+    data.splineSegmentStart.position = trajectory.spline.getPoint(start);
+    data.splineSegmentStart.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(trajectory.spline.getHeading(start), Eigen::Vector3d::UnitZ()));
+    
+    if (end <= trajectory.spline.getEndParam()) {
+	data.splineSegmentEnd.position = trajectory.spline.getPoint(end);
+	data.splineSegmentEnd.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(trajectory.spline.getHeading(end), Eigen::Vector3d::UnitZ()));
+    }
 
     data.curveParameter = newCurveParam; // Curve parameter of reference point
     data.distanceError  = trajectory.spline.distanceError(data.currentPose.position, data.curveParameter); // Distance error

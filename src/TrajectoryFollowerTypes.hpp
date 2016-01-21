@@ -119,11 +119,12 @@ namespace trajectory_follower
         double curveLength; ///< Curve length
         double distanceToEnd; ///< Distance along curve to end
         
-        base::Trajectory trajectorySegment;
 	base::Vector2d movementVector;
 	base::Pose lastPose;
 	double posError, lastPosError;
 	base::Pose goalPose;
+	base::samples::RigidBodyState splineSegmentStart;
+	base::samples::RigidBodyState splineSegmentEnd;
 
         FollowerData()
             : followerStatus( TRAJECTORY_FINISHED ),
@@ -142,6 +143,10 @@ namespace trajectory_follower
 	    movementVector = base::Vector2d(0., 0.);
 	    lastPose.position = Eigen::Vector3d(0., 0., 0.);
 	    lastPose.orientation = Eigen::Quaterniond::Identity();
+	    splineSegmentStart.position = Eigen::Vector3d(0., 0., 0.);
+	    splineSegmentStart.orientation = Eigen::Quaterniond::Identity();
+	    splineSegmentEnd.position = Eigen::Vector3d(0., 0., 0.);
+	    splineSegmentEnd.orientation = Eigen::Quaterniond::Identity();
         }
     };
 }
