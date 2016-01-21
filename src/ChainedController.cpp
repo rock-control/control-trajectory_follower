@@ -56,29 +56,25 @@ void ChainedController::configure( const ChainedControllerConfig& config_ )
 const base::commands::Motion2D& ChainedController::update( double u1, 
         double d, double theta_e, double c, double c_s )
 {
-    double d_dot, s_dot, z2, z3, v2, u2;
+    double d_dot, s_dot, z2, z3, v1, v2, u2;
     
     double direction = 1.0;
-    if( u1 < 0 )
-    {
+    if(u1 < 0) {
         // Backward motion
         direction = -1.0;
-        u1 = fabs( u1 );
+        u1 = fabs(u1);
     }
 
     d_dot = u1 * sin(theta_e);
     s_dot = u1 * cos(theta_e) / (1.0-d*c);
 
+    v1 = s_dot;
     z2 = d;
     z3 = (1.0-(d*c))*tan(theta_e);
 
     z0 += (s_dot * z2);
-
-    v2 = -(fabs(s_dot)) * config.K0 * z0 + (-s_dot * config.K2 * z2) - 
-        (fabs(s_dot) * config.K3 * z3);
-
-    u2 = ((v2 + ((d_dot*c + d*c_s*s_dot)*tan(theta_e))) / 
-            ((1.0-d*c)*(1+pow(tan(theta_e),2)))) + (s_dot*c);
+    v2 = -fabs(v1)*config.K0*z0 - v1*config.K2*z2 - fabs(v1)*config.K3 * z3;
+    u2 = (v2 + (d_dot*c + d*c_s*s_dot)*tan(theta_e))/((1.0-d*c)*(1+pow(tan(theta_e),2))) + s_dot*c;
 
     motionCommand.translation = u1*direction;
     motionCommand.rotation = u2;
@@ -94,12 +90,9 @@ bool ChainedController::initialStable( double d, double theta_e, double c,
     z2 = d;
     z3 = (1.0-(d*c_max))*tan(theta_e);
 
-    if( z2*z2+(z3*z3/(config.K2-(config.K0/config.K3))) < (1/(c_max*c_max)) )
-    {
+    if (z2*z2+(z3*z3/(config.K2-(config.K0/config.K3))) < (1/(c_max*c_max))) {
         return true;
-    }
-    else 
-    {
+    } else {
         LOG_INFO_S << "ChainedController Initially unstable";
         return false;	    
     }

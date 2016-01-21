@@ -19,6 +19,7 @@ TrajectoryFollower::TrajectoryFollower()
       controllerType(CONTROLLER_UNKNOWN )
 {
     data.followerStatus = TRAJECTORY_FINISHED;
+    nearEnd = false;
 }
 
 TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
@@ -42,6 +43,7 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     }
 
     configured = true;
+    nearEnd = false;
 }
 
 void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
@@ -52,6 +54,9 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
 
     // Sets the trajectory
     trajectory = trajectory_;
+    nearEnd = false;
+    data.goalPose.position = trajectory.spline.getEndPoint();
+    data.goalPose.orientation = Eigen::Quaterniond(AngleAxisd(trajectory.spline.getHeading(trajectory.spline.getEndParam()), Eigen::Vector3d::UnitZ()));
 
     // Sets the geometric resolution
     trajectory.spline.setGeometricResolution(trajectoryConfig.geometricResolution);
@@ -95,7 +100,7 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
 
 void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
 {
-    base::Pose lastRobotPose = data.currentPose;
+    data.lastPose = data.currentPose;
 
     // Transform robot pose into pose of the center of rotation
     data.currentPose.fromTransform(robotPose.toTransform() * poseTransform.toTransform());
@@ -105,11 +110,22 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
 
     // Change heading based on direction of motion
     if(!trajectory.driveForward())
-        data.currentHeading = angleLimit( data.currentHeading + M_PI );
+        data.currentHeading = angleLimit(data.currentHeading + M_PI);
 
-    double direction = 1.0;
-    movementVector = lastRobotPose.position.head(2) - data.currentPose.position.head(2);
-    double movementDirection = atan2(movementVector.y(), movementVector.x());
+    double direction = 1.;
+    if(controllerType == CONTROLLER_NO_ORIENTATION) {
+        if (!trajectory.driveForward())
+            direction = -1.;
+
+        //data.lastPose = data.currentPose;
+        // No orientation controller actual point is offset by given value
+        // and based on direction of movement
+        data.currentPose.position += AngleAxisd(data.currentHeading, Vector3d::UnitZ())
+                                     * Vector3d(direction*noOrientationController.getConfig().l1, 0, 0);
+    }
+
+    data.movementVector = data.lastPose.position.head(2) - data.currentPose.position.head(2);
+    double movementDirection = atan2(data.movementVector.y(), data.movementVector.x());
 
     base::Angle diff(base::Angle::fromRad(movementDirection) - base::Angle::fromRad(data.currentPose.getYaw()));
 
@@ -123,34 +139,31 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
 
     // Find the closest point on the curve and gets the distance error and
     // heading error at this point
-    double distanceMoved = (data.currentPose.position.head(2) - lastRobotPose.position.head(2)).norm() * direction;
+    double distanceMoved = (data.currentPose.position.head(2) - data.lastPose.position.head(2)).norm() * direction;
     double errorMargin = distanceMoved * 0.1;
-    errorMargin = std::max(errorMargin, trajectoryConfig.trajectoryFinishDistance);
-    double guess = trajectory.spline.advance(data.curveParameter, distanceMoved, 0.01).first;
+    errorMargin = std::max(errorMargin, 0.01);
 
     //Find upper and lower bound for local search
     double start = trajectory.spline.advance(data.curveParameter, distanceMoved - errorMargin, 0.01).first;
     double end = trajectory.spline.advance(data.curveParameter, distanceMoved + errorMargin, 0.01).first;
+    double guess = trajectory.spline.advance(data.curveParameter, distanceMoved, 0.01).first;
 
-    Eigen::Vector3d pos(data.currentPose.position);
-    pos.z() = 0;
+    Eigen::Vector3d curPos(data.currentPose.position);
+    curPos.z() = 0;
 
-    double newParam = trajectory.spline.localClosestPointSearch(pos, guess, start, end, 0.0001);
-    double targetParam = newParam;
+    double newCurveParam = data.trajectorySegment.spline.localClosestPointSearch(curPos, guess, start, end, 0.0001);
 
-    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION)
-        targetParam = trajectory.spline.advance(newParam, noOrientationController.getConfig().l1, 0.01).first;
+    // debug output
+    data.trajectorySegment = trajectory;
+    data.trajectorySegment.spline.crop(start, end);
 
-    trajectorySegment = trajectory;
-    trajectorySegment.spline.crop(start, end);
-
-    data.distanceError  = trajectory.spline.distanceError(data.currentPose.position, targetParam); // Distance error
-    data.angleError     = angleLimit(trajectory.spline.headingError(data.currentHeading, targetParam)); // Heading error
-    data.curveParameter = newParam; // Curve parameter of reference point
+    data.curveParameter = newCurveParam; // Curve parameter of reference point
+    data.distanceError  = trajectory.spline.distanceError(data.currentPose.position, data.curveParameter); // Distance error
+    data.angleError     = angleLimit(trajectory.spline.headingError(data.currentHeading, data.curveParameter)); // Heading error
 
     // Setting reference values
-    data.referenceHeading = trajectory.spline.getHeading(targetParam);
-    data.referencePose.position = trajectory.spline.getPoint(targetParam);
+    data.referenceHeading = trajectory.spline.getHeading(data.curveParameter);
+    data.referencePose.position = trajectory.spline.getPoint(data.curveParameter);
     data.referencePose.orientation = AngleAxisd(data.referenceHeading, Vector3d::UnitZ());
 }
 
@@ -176,6 +189,8 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     bool reachedEnd = false;
 
     data.distanceToEnd = fabs(trajectory.spline.getCurveLength(data.curveParameter, trajectoryConfig.geometricResolution));
+    data.posError = (data.currentPose.position.head(2) - data.goalPose.position.head(2)).norm();
+    data.lastPosError = (data.lastPose.position.head(2) - data.goalPose.position.head(2)).norm();
 
     // If distance to trajectory finish set
     if (base::isUnset<double>(trajectoryConfig.trajectoryFinishDistance)) {
@@ -186,11 +201,20 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
         // Distance along curve to end point
         if (data.distanceToEnd <= trajectoryConfig.trajectoryFinishDistance)
             reachedEnd = true;
+
+        if (data.posError <= trajectoryConfig.trajectoryFinishDistance)
+            nearEnd = true;
+    }
+
+    if (nearEnd) {
+        if (data.posError > data.lastPosError)
+            reachedEnd = true;
     }
 
     // If end reached
     if (reachedEnd) {
         // Trajectory finished
+        nearEnd = false;
         LOG_INFO_S << "Trajectory follower finished";
         data.followerStatus = TRAJECTORY_FINISHED;
         return data.followerStatus;

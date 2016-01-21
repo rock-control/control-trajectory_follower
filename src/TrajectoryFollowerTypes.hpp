@@ -17,10 +17,12 @@ namespace trajectory_follower
         double trajectoryFinishDistance; ///< Minimum distance to end point 
                                          ///< of trajectory for considering it
                                          ///< to be reached
+        double steerAngleUpperLimit;
                                          
         TrajectoryConfig()
             : geometricResolution( 0.001 ),
-            trajectoryFinishDistance( base::unset< double >() )
+            trajectoryFinishDistance( base::unset< double >() ),
+            steerAngleUpperLimit( base::unset< double >() )
         {}
     };
 
@@ -115,7 +117,13 @@ namespace trajectory_follower
         base::commands::Motion2D motionCommand; ///< Motion command
 
         double curveLength; ///< Curve length
-        double distanceToEnd; ///< Distance along curve to end 
+        double distanceToEnd; ///< Distance along curve to end
+        
+        base::Trajectory trajectorySegment;
+	base::Vector2d movementVector;
+	base::Pose lastPose;
+	double posError, lastPosError;
+	base::Pose goalPose;
 
         FollowerData()
             : followerStatus( TRAJECTORY_FINISHED ),
@@ -125,13 +133,17 @@ namespace trajectory_follower
             distanceError( base::unset< double >() ),
             angleError( base::unset< double >() ),
             curveLength( base::unset< double >() ),
-            distanceToEnd( base::unset< double >() )
+            distanceToEnd( base::unset< double >() ),
+            posError( base::unset< double >() ),
+            lastPosError( base::unset< double >() )
         {
             motionCommand.translation = 0.0;
             motionCommand.rotation = 0.0;
+	    movementVector = base::Vector2d(0., 0.);
+	    lastPose.position = Eigen::Vector3d(0., 0., 0.);
+	    lastPose.orientation = Eigen::Quaterniond::Identity();
         }
     };
 }
 
 #endif
-
