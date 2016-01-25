@@ -239,5 +239,8 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
                                               trajectory.spline.getVariationOfCurvature(data.curveParameter));
     }
 
+    while (motionCmd.rotation > 2*M_PI || motionCmd.rotation < -2*M_PI)
+	motionCmd.rotation += (motionCmd.rotation > 2*M_PI ? -1 : 1)*2*M_PI;
+    
     return data.followerStatus;
 }
