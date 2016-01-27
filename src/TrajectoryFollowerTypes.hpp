@@ -10,7 +10,7 @@
 
 namespace trajectory_follower
 {
-    
+
 /** Config for finding the reference point in trajectory */
 struct TrajectoryConfig
 {
@@ -18,10 +18,17 @@ struct TrajectoryConfig
     double trajectoryFinishDistance; ///< Minimum distance to end point
     ///< of trajectory for considering it
     ///< to be reached
+    double splineReferenceError;
+    double splineReferenceErrorMarginCoefficient;
+    double maxForwardLenght, maxBackwardLenght;
 
     TrajectoryConfig()
         : geometricResolution( 0.001 ),
-          trajectoryFinishDistance( base::unset< double >() )
+          trajectoryFinishDistance( base::unset< double >() ),
+          splineReferenceError(base::unset< double >()),
+          splineReferenceErrorMarginCoefficient(base::unset< double >()),
+          maxForwardLenght( base::unset< double >() ),
+          maxBackwardLenght( base::unset< double >() )
     {}
 };
 
@@ -118,12 +125,17 @@ struct FollowerData
     double curveLength; ///< Curve length
     double distanceToEnd; ///< Distance along curve to end
 
-    base::Vector2d movementVector;
+    base::samples::RigidBodyState movementDirection;
     base::Pose lastPose;
     double posError, lastPosError;
     base::Pose goalPose;
-    base::samples::RigidBodyState splineSegmentStart;
-    base::samples::RigidBodyState splineSegmentEnd;
+    base::samples::RigidBodyState splineSegmentStartPose, splineSegmentEndPose;
+    double splineSegmentStartCurveParam, splineSegmentEndCurveParam, splineSegmentGuessCurveParam;
+    double distanceMoved;
+    double splineReferenceErrorCoefficient;
+    double errorMargin;
+    base::samples::RigidBodyState splineReferencePose;
+    base::samples::RigidBodyState motionCommandViz;
 
     FollowerData()
         : followerStatus( TRAJECTORY_FINISHED ),
@@ -135,17 +147,28 @@ struct FollowerData
           curveLength( base::unset< double >() ),
           distanceToEnd( base::unset< double >() ),
           posError( base::unset< double >() ),
-          lastPosError( base::unset< double >() )
+          lastPosError( base::unset< double >() ),
+          splineSegmentStartCurveParam( base::unset< double >() ),
+          splineSegmentEndCurveParam( base::unset< double >() ),
+          splineSegmentGuessCurveParam( base::unset< double >() ),
+          distanceMoved( base::unset< double >() ),
+          splineReferenceErrorCoefficient( base::unset< double >() ),
+          errorMargin( base::unset< double >() )
     {
         motionCommand.translation = 0.0;
         motionCommand.rotation = 0.0;
-        movementVector = base::Vector2d(0., 0.);
         lastPose.position = Eigen::Vector3d(0., 0., 0.);
         lastPose.orientation = Eigen::Quaterniond::Identity();
-        splineSegmentStart.position = Eigen::Vector3d(0., 0., 0.);
-        splineSegmentStart.orientation = Eigen::Quaterniond::Identity();
-        splineSegmentEnd.position = Eigen::Vector3d(0., 0., 0.);
-        splineSegmentEnd.orientation = Eigen::Quaterniond::Identity();
+        splineSegmentStartPose.position = Eigen::Vector3d(0., 0., 0.);
+        splineSegmentStartPose.orientation = Eigen::Quaterniond::Identity();
+        splineSegmentEndPose.position = Eigen::Vector3d(0., 0., 0.);
+        splineSegmentEndPose.orientation = Eigen::Quaterniond::Identity();
+        splineReferencePose.position = Eigen::Vector3d(0., 0., 0.);
+        splineReferencePose.orientation = Eigen::Quaterniond::Identity();
+        motionCommandViz.position = Eigen::Vector3d(0., 0., 0.);
+        motionCommandViz.orientation = Eigen::Quaterniond::Identity();
+        movementDirection.position = Eigen::Vector3d(0., 0., 0.);
+        movementDirection.orientation = Eigen::Quaterniond::Identity();
     }
 };
 
