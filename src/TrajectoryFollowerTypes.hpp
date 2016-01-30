@@ -136,7 +136,7 @@ struct FollowerData
     double errorMargin;
     base::samples::RigidBodyState splineReferencePose;
     base::samples::RigidBodyState motionCommandViz;
-
+    
     FollowerData()
         : followerStatus( TRAJECTORY_FINISHED ),
           curveParameter( base::unset< double >() ),
