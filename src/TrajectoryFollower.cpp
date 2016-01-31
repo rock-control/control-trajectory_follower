@@ -135,27 +135,14 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     if(!trajectory.driveForward())
         data.currentHeading = angleLimit(data.currentHeading + M_PI);
 
-    double direction = 1.;
-    if(controllerType == CONTROLLER_NO_ORIENTATION) {
-        if (!trajectory.driveForward())
-            direction = -1.;
-
-        //data.lastPose = data.currentPose;
-        // No orientation controller actual point is offset by given value
-        // and based on direction of movement
-        data.currentPose.position += AngleAxisd(data.currentHeading, Vector3d::UnitZ())
-                                     * Vector3d(direction*noOrientationController.getConfig().l1, 0, 0);
-    }
-
     Vector2d movementVector = data.currentPose.position.head(2) - data.lastPose.position.head(2);
     data.distanceMoved = movementVector.norm();
-    
     data.movementDirection.position = data.currentPose.position;
     data.movementDirection.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(atan2(movementVector.y(), movementVector.x()), Eigen::Vector3d::UnitZ()));
-    
-    direction = 1.;
+
+    double direction = 1.;
     if (std::abs(data.movementDirection.getYaw() - data.currentHeading) > base::Angle::fromDeg(90).getRad())
-	direction = -1.;
+        direction = -1.;
 
     data.errorMargin = data.distanceMoved*data.splineReferenceErrorCoefficient;
     if (!base::isUnset<double>(trajectoryConfig.splineReferenceError))
@@ -183,24 +170,17 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
         data.splineSegmentEndCurveParam = trajectory.spline.getEndParam();
 
     double dist = data.distanceMoved*direction;
-    if ((dist > 0. && data.distanceToEnd > dist) || (dist < 0. && data.distanceToEnd+std::abs(dist) < data.curveLength))
+    if ((dist > 0. && data.distanceToEnd > dist) || (dist < 0. && (data.curveLength-data.distanceToEnd) > std::abs(dist)))
         data.splineSegmentGuessCurveParam = trajectory.spline.advance(data.curveParameter, dist, trajectoryConfig.geometricResolution).first;
     else if (dist > 0.)
         data.splineSegmentGuessCurveParam = trajectory.spline.getEndParam();
     else
-	data.splineSegmentGuessCurveParam = trajectory.spline.getStartParam();
+        data.splineSegmentGuessCurveParam = trajectory.spline.getStartParam();
 
     Eigen::Vector3d curPos(data.currentPose.position);
     curPos.z() = 0;
 
     data.curveParameter = trajectory.spline.localClosestPointSearch(curPos, data.splineSegmentGuessCurveParam, data.splineSegmentStartCurveParam, data.splineSegmentEndCurveParam, trajectoryConfig.geometricResolution);
-    double currentCurveParameter = data.curveParameter;
-    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION) {
-	Eigen::Vector3d curPosReal(robotPose.position);
-	curPosReal.z() = 0;
-	currentCurveParameter = trajectory.spline.localClosestPointSearch(curPosReal, data.splineSegmentGuessCurveParam, data.splineSegmentStartCurveParam, data.splineSegmentEndCurveParam, trajectoryConfig.geometricResolution);
-    }
-    
     data.splineSegmentStartPose.position = trajectory.spline.getPoint(data.splineSegmentStartCurveParam);
     data.splineSegmentStartPose.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(trajectory.spline.getHeading(data.splineSegmentStartCurveParam), Eigen::Vector3d::UnitZ()));
 
@@ -209,15 +189,19 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
         data.splineSegmentEndPose.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(trajectory.spline.getHeading(data.splineSegmentEndCurveParam), Eigen::Vector3d::UnitZ()));
     }
 
-    data.distanceError  = trajectory.spline.distanceError(data.currentPose.position, data.curveParameter); // Distance error
-    data.angleError     = angleLimit(trajectory.spline.headingError(data.currentHeading, data.curveParameter)); // Heading error
+    double targetCurveParam = data.curveParameter;
+    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION) {
+        if (!base::isUnset<double>(noOrientationController.getConfig().l1))
+            targetCurveParam = trajectory.spline.advance(data.curveParameter, noOrientationController.getConfig().l1, trajectoryConfig.geometricResolution).first;
+    }
+
+    data.distanceError  = trajectory.spline.distanceError(data.currentPose.position, targetCurveParam); // Distance error
+    data.angleError     = angleLimit(trajectory.spline.headingError(data.currentHeading, targetCurveParam)); // Heading error
 
     // Setting reference values
     data.referenceHeading = trajectory.spline.getHeading(data.curveParameter);
     data.referencePose.position = trajectory.spline.getPoint(data.curveParameter);
     data.referencePose.orientation = AngleAxisd(data.referenceHeading, Vector3d::UnitZ());
-    
-    data.curveLength = currentCurveParameter;
 }
 
 FollowerStatus TrajectoryFollower::traverseTrajectory(
@@ -234,7 +218,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     }
 
     data.time = base::Time::now();
-    
+
     data.splineReferencePose.position = data.referencePose.position;
     data.splineReferencePose.orientation = data.referencePose.orientation;
 
@@ -293,7 +277,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
 
     while (motionCmd.rotation > 2*M_PI || motionCmd.rotation < -2*M_PI)
         motionCmd.rotation += (motionCmd.rotation > 2*M_PI ? -1 : 1)*2*M_PI;
-    
+
     data.motionCommandViz.position = robotPose.position;
     data.motionCommandViz.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(motionCmd.rotation, Eigen::Vector3d::UnitZ()));
 
