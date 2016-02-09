@@ -53,7 +53,7 @@ void NoOrientationController::configure(
 }
 
 const base::commands::Motion2D& NoOrientationController::update( double u1, 
-        double d, double theta_e )
+        double d, double theta_e)
 {
     if( !configured )
     {

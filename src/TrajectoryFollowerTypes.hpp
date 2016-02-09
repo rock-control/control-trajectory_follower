@@ -45,7 +45,7 @@ enum ControllerType
 {
     CONTROLLER_UNKNOWN = -1,
     CONTROLLER_NO_ORIENTATION = 0,
-    CONTROLLER_CHAINED = 1,
+    CONTROLLER_CHAINED = 1
 };
 
 /** No orientation controller config */
@@ -112,8 +112,6 @@ struct FollowerData
     base::Pose referencePose;
     base::Pose currentPose;
 
-    //base::Trajectory currentTrajectory;
-
     double referenceHeading; ///< Reference heading
     double currentHeading; ///< Current heading
 
@@ -136,6 +134,9 @@ struct FollowerData
     double errorMargin;
     base::samples::RigidBodyState splineReferencePose;
     base::samples::RigidBodyState motionCommandViz;
+    double curvature, variationOfCurvature;
+    double fwLength;
+    std::vector< base::Trajectory > currentTrajectory;
     
     FollowerData()
         : followerStatus( TRAJECTORY_FINISHED ),
@@ -153,7 +154,10 @@ struct FollowerData
           splineSegmentGuessCurveParam( base::unset< double >() ),
           distanceMoved( base::unset< double >() ),
           splineReferenceErrorCoefficient( base::unset< double >() ),
-          errorMargin( base::unset< double >() )
+          errorMargin( base::unset< double >() ),
+          curvature(base::unset< double >()),
+          variationOfCurvature(base::unset< double >()),
+          fwLength(base::unset< double >())
     {
         motionCommand.translation = 0.0;
         motionCommand.rotation = 0.0;

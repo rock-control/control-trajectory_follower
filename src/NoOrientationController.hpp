@@ -42,8 +42,7 @@ namespace trajectory_follower
             inline void reset() {}
 
             bool initialStable( double d , double theta_e, double c_max );
-            const base::commands::Motion2D& update( double u1, double d, 
-                    double theta_e );
+            const base::commands::Motion2D& update( double u1, double d, double theta_e );
 
         protected:
             bool checkPointTurn( double theta_e);
