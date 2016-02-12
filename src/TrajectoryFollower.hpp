@@ -63,6 +63,7 @@ public:
 private:
     bool configured; ///< True if configured properly
     bool nearEnd;
+    double dampingCoefficient;
 
     base::Trajectory trajectory; ///< Active trajectory
 
@@ -74,6 +75,7 @@ private:
     ChainedController chainedController; ///< Chained controller
 
     FollowerData data; ///< Follower data
+    ControllerConfig controllerConf;
 };
 
 }
