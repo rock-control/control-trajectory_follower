@@ -38,18 +38,18 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     if(controllerType == CONTROLLER_NO_ORIENTATION) {
         // No orientation controller
         noOrientationController = NoOrientationController(followerConfig.noOrientationControllerConfig);
-	controllerConf = followerConfig.noOrientationControllerConfig;
+        controllerConf = followerConfig.noOrientationControllerConfig;
     } else if (controllerType == CONTROLLER_CHAINED) {
         // Chained controller
         chainedController = ChainedController(followerConfig.chainedControllerConfig);
-	controllerConf = followerConfig.chainedControllerConfig;
+        controllerConf = followerConfig.chainedControllerConfig;
     } else {
         throw std::runtime_error("Wrong controller type given, it should be  "
                                  "either CONTROLLER_NO_ORIENTATION (0) or CONTROLLER_CHAINED (1).");
     }
-    
+
     if (!base::isUnset< double >(controllerConf.dampingAngleUpperLimit))
-	dampingCoefficient = 1/std::log(base::Angle::fromRad(controllerConf.dampingAngleUpperLimit).getDeg()+1.);
+        dampingCoefficient = 1/std::log(base::Angle::fromRad(controllerConf.dampingAngleUpperLimit).getDeg()+1.);
 
     configured = true;
     nearEnd = false;
@@ -198,23 +198,53 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
         data.splineSegmentEndPose.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(trajectory.spline.getHeading(data.splineSegmentEndCurveParam), Eigen::Vector3d::UnitZ()));
     }
 
-    double targetCurveParam = data.curveParameter;
-    data.distanceError = trajectory.spline.distanceError(data.currentPose.position, targetCurveParam); // Distance error
-
-    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION) {
-        if (!base::isUnset<double>(noOrientationController.getConfig().l1)) {
-            targetCurveParam = trajectory.spline.advance(data.curveParameter, noOrientationController.getConfig().l1, trajectoryConfig.geometricResolution).first;
-        }
-    }
-
-    data.angleError = angleLimit(trajectory.spline.headingError(data.currentHeading, targetCurveParam)); // Heading error
-
     // Setting reference values
     data.referenceHeading = trajectory.spline.getHeading(data.curveParameter);
     data.referencePose.position = trajectory.spline.getPoint(data.curveParameter);
     data.referencePose.orientation = AngleAxisd(data.referenceHeading, Vector3d::UnitZ());
     data.curvature = trajectory.spline.getCurvature(data.curveParameter);
     data.variationOfCurvature = trajectory.spline.getVariationOfCurvature(data.curveParameter);
+    
+    double targetCurveParam = data.curveParameter;
+    base::Pose targetPose = data.currentPose;
+    
+    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION
+            && !base::isUnset<double>(noOrientationController.getConfig().l1))
+    {
+        double targetCurveParamCoefficient = (data.maxCurvature-data.variationOfCurvature)/data.maxCurvature;
+        targetCurveParamCoefficient = std::max(1., targetCurveParamCoefficient);
+        targetCurveParamCoefficient = std::min(targetCurveParamCoefficient, 0.1);
+        targetCurveParam = trajectory.spline.advance(targetCurveParam, targetCurveParamCoefficient*noOrientationController.getConfig().l1, trajectoryConfig.geometricResolution).first;
+        targetPose.position += AngleAxisd(data.currentHeading, Vector3d::UnitZ()) * Vector3d(noOrientationController.getConfig().l1, 0, 0);
+        Eigen::Vector3d fwPosition = targetPose.position;
+        fwPosition.z() = 0.;
+        double endParam = std::min(trajectory.spline.getEndParam(), data.splineSegmentEndCurveParam+noOrientationController.getConfig().l1);
+        data.splineSegmentEndPose.position = trajectory.spline.getPoint(endParam);
+        data.splineSegmentEndPose.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(trajectory.spline.getHeading(endParam), Eigen::Vector3d::UnitZ()));
+        targetCurveParam = trajectory.spline.localClosestPointSearch(fwPosition, targetCurveParam, data.splineSegmentStartCurveParam, endParam, trajectoryConfig.geometricResolution);
+    }
+
+    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION
+            && noOrientationController.getConfig().useForwardAngleError)
+    {
+        data.angleError = angleLimit(trajectory.spline.headingError(data.currentHeading, targetCurveParam));
+        data.referencePose.orientation = AngleAxisd(trajectory.spline.getHeading(targetCurveParam), Vector3d::UnitZ());
+    }
+    else
+    {
+        data.angleError = angleLimit(trajectory.spline.headingError(data.currentHeading, data.curveParameter));
+    }
+
+    if (controllerType == trajectory_follower::CONTROLLER_NO_ORIENTATION
+	&& noOrientationController.getConfig().useForwardDistanceError)
+    {   
+        data.distanceError = trajectory.spline.distanceError(targetPose.position, targetCurveParam);
+        data.referencePose.position = trajectory.spline.getPoint(targetCurveParam);
+    }
+    else
+    {
+        data.distanceError = trajectory.spline.distanceError(data.currentPose.position, data.curveParameter);
+    }
 }
 
 FollowerStatus TrajectoryFollower::traverseTrajectory(
@@ -232,11 +262,11 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
 
     data.time = base::Time::now();
 
-    data.splineReferencePose.position = data.referencePose.position;
-    data.splineReferencePose.orientation = data.referencePose.orientation;
-
     // Computes reference pose and the errors
     computeErrors(robotPose);
+    
+    data.splineReferencePose.position = data.referencePose.position;
+    data.splineReferencePose.orientation = data.referencePose.orientation;
 
     // Finding reached end condition
     bool reachedEnd = false;
@@ -253,7 +283,12 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
     } else {
         // Distance along curve to end point
         if (data.distanceToEnd <= trajectoryConfig.trajectoryFinishDistance)
-            nearEnd = true;
+        {
+            if (trajectoryConfig.usePoseErrorReachedEndCheck)
+                nearEnd = true;
+            else
+                reachedEnd = true;
+        }
 
         if (data.posError <= trajectoryConfig.trajectoryFinishDistance)
             reachedEnd = true;
@@ -286,13 +321,13 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
 
     while (motionCmd.rotation > 2*M_PI || motionCmd.rotation < -2*M_PI)
         motionCmd.rotation += (motionCmd.rotation > 2*M_PI ? -1 : 1)*2*M_PI;
-    
+
     // HACK: use damping factor to prevend oscillating steering behavior
     if (!base::isUnset<double>(controllerConf.dampingAngleUpperLimit) && controllerConf.dampingAngleUpperLimit > 0) {
-	data.dampingFactor = std::min(1., std::log(std::abs(base::Angle::fromRad(motionCmd.rotation).getDeg())+1.)*dampingCoefficient);
-	motionCmd.rotation *= data.dampingFactor;
+        data.dampingFactor = std::min(1., std::log(std::abs(base::Angle::fromRad(motionCmd.rotation).getDeg())+1.)*dampingCoefficient);
+        motionCmd.rotation *= data.dampingFactor;
     }
-    
+
     data.motionCommand = motionCmd;
     return data.followerStatus;
 }

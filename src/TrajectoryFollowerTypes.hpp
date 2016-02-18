@@ -21,6 +21,7 @@ struct TrajectoryConfig
     double splineReferenceError;
     double splineReferenceErrorMarginCoefficient;
     double maxForwardLenght, maxBackwardLenght;
+    bool usePoseErrorReachedEndCheck;
 
     TrajectoryConfig()
         : geometricResolution( 0.001 ),
@@ -29,7 +30,9 @@ struct TrajectoryConfig
           splineReferenceErrorMarginCoefficient(base::unset< double >()),
           maxForwardLenght( base::unset< double >() ),
           maxBackwardLenght( base::unset< double >() )
-    {}
+    {
+        usePoseErrorReachedEndCheck = false;
+    }
 };
 
 /** Follower Status */
@@ -66,6 +69,7 @@ struct NoOrientationControllerConfig : public ControllerConfig
     double pointTurnStart; ///< Angle error at which point turn starts
     double pointTurnEnd;   ///< Angle error at which point turn, once started, stops
     double pointTurnVelocity; ///< Point turn velocity
+    bool useForwardAngleError, useForwardDistanceError;
 
     NoOrientationControllerConfig()
         : ControllerConfig()
@@ -76,6 +80,8 @@ struct NoOrientationControllerConfig : public ControllerConfig
         pointTurnStart = base::unset< double >();
         pointTurnEnd = base::unset< double >();
         pointTurnVelocity = base::unset< double >();
+	useForwardAngleError = false;
+	useForwardDistanceError = false;
     }
 
     void operator = (const ControllerConfig& base_)
