@@ -85,14 +85,16 @@ const base::commands::Motion2D& NoOrientationController::update( double u1,
 bool NoOrientationController::initialStable( double d, double theta_e, 
         double c_max )
 {
-    if( theta_e > -M_PI / 2.0 && theta_e < M_PI / 2.0
-            && ( ( config.l1 * c_max ) / ( 1 - fabs( d ) * c_max ) ) < 1 ) 
+    double dist_err_value = ( config.l1 * c_max ) / ( 1 - fabs( d ) * c_max );
+    if( theta_e > -M_PI / 2.0 && theta_e < M_PI / 2.0 && dist_err_value < 1 ) 
     {
         return true;
     } 
     else 
     { 
         LOG_INFO_S << "NoOrientationController Initially unstable";
+        LOG_INFO_S << "Distance Error: " << d << ", Angle Error: " << theta_e << 
+                ", Max Curvature: " << c_max << ", Dist Err: " << dist_err_value;
         return false;	    
     }
 }
