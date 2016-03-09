@@ -59,11 +59,15 @@ public:
     const FollowerData& getData() {
         return data;
     }
+    
+    void checkTurnOnSpot();
 
 private:
     bool configured; ///< True if configured properly
     bool nearEnd;
     double dampingCoefficient;
+    bool pointTurn;
+    double pointTurnDirection;
 
     base::Trajectory trajectory; ///< Active trajectory
 

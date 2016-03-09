@@ -41,6 +41,7 @@ enum FollowerStatus
     TRAJECTORY_FOLLOWING,
     TRAJECTORY_FINISHED,
     INITIAL_STABILITY_FAILED,
+    TURN_ON_SPOT
 };
 
 /** Controller Types */
@@ -54,8 +55,17 @@ enum ControllerType
 struct ControllerConfig
 {
     double dampingAngleUpperLimit;
+    double maxRotationalVelocity; ///< Maximum rotational velocity, NaN if no limit is needed
+    double pointTurnStart; ///< Angle error at which point turn starts
+    double pointTurnEnd;   ///< Angle error at which point turn, once started, stops
+    double pointTurnVelocity; ///< Point turn velocity
 
-    ControllerConfig() : dampingAngleUpperLimit(base::unset< double >())
+    ControllerConfig()
+        : dampingAngleUpperLimit(base::unset< double >())
+        , maxRotationalVelocity(base::unset< double >())
+        , pointTurnStart(base::unset< double >())
+        , pointTurnEnd(base::unset< double >())
+        , pointTurnVelocity(base::unset< double >())
     {
     }
 };
@@ -65,10 +75,6 @@ struct NoOrientationControllerConfig : public ControllerConfig
 {
     double l1; ///< Position of reference point P(l1,0) on the robot chassis such that l1u1 > 0
     double K0; ///< Constant for the calculation of k(d, theta_e)
-    double maxRotationalVelocity; ///< Maximum rotational velocity, NaN if no limit is needed
-    double pointTurnStart; ///< Angle error at which point turn starts
-    double pointTurnEnd;   ///< Angle error at which point turn, once started, stops
-    double pointTurnVelocity; ///< Point turn velocity
     bool useForwardAngleError, useForwardDistanceError;
 
     NoOrientationControllerConfig()
@@ -76,10 +82,6 @@ struct NoOrientationControllerConfig : public ControllerConfig
     {
         l1 = base::unset< double >();
         K0 = base::unset< double >();
-        maxRotationalVelocity = base::unset< double >();
-        pointTurnStart = base::unset< double >();
-        pointTurnEnd = base::unset< double >();
-        pointTurnVelocity = base::unset< double >();
 	useForwardAngleError = false;
 	useForwardDistanceError = false;
     }
@@ -141,15 +143,10 @@ struct FollowerData
     base::commands::Motion2D motionCommand; ///< Motion command
     double curveLength; ///< Curve length
     double distanceToEnd; ///< Distance along curve to end
-    base::samples::RigidBodyState movementDirection;
     base::Pose lastPose;
     double posError, lastPosError;
     base::Pose goalPose;
-    base::samples::RigidBodyState splineSegmentStartPose, splineSegmentEndPose;
-    double splineSegmentStartCurveParam, splineSegmentEndCurveParam, splineSegmentGuessCurveParam;
-    double distanceMoved;
     double splineReferenceErrorCoefficient;
-    double errorMargin;
     base::samples::RigidBodyState splineReferencePose;
     double curvature, variationOfCurvature, maxCurvature;
     std::vector< base::Trajectory > currentTrajectory;
@@ -166,12 +163,7 @@ struct FollowerData
           distanceToEnd( base::unset< double >() ),
           posError( base::unset< double >() ),
           lastPosError( base::unset< double >() ),
-          splineSegmentStartCurveParam( base::unset< double >() ),
-          splineSegmentEndCurveParam( base::unset< double >() ),
-          splineSegmentGuessCurveParam( base::unset< double >() ),
-          distanceMoved( base::unset< double >() ),
           splineReferenceErrorCoefficient( base::unset< double >() ),
-          errorMargin( base::unset< double >() ),
           curvature(base::unset< double >()),
           variationOfCurvature(base::unset< double >()),
           maxCurvature(base::unset< double >()),
@@ -181,14 +173,8 @@ struct FollowerData
         motionCommand.rotation = 0.0;
         lastPose.position = Eigen::Vector3d(0., 0., 0.);
         lastPose.orientation = Eigen::Quaterniond::Identity();
-        splineSegmentStartPose.position = Eigen::Vector3d(0., 0., 0.);
-        splineSegmentStartPose.orientation = Eigen::Quaterniond::Identity();
-        splineSegmentEndPose.position = Eigen::Vector3d(0., 0., 0.);
-        splineSegmentEndPose.orientation = Eigen::Quaterniond::Identity();
         splineReferencePose.position = Eigen::Vector3d(0., 0., 0.);
         splineReferencePose.orientation = Eigen::Quaterniond::Identity();
-        movementDirection.position = Eigen::Vector3d(0., 0., 0.);
-        movementDirection.orientation = Eigen::Quaterniond::Identity();
     }
 };
 

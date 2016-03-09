@@ -45,10 +45,7 @@ namespace trajectory_follower
             const base::commands::Motion2D& update( double u1, double d, double theta_e );
 
         protected:
-            bool checkPointTurn( double theta_e);
-
             NoOrientationControllerConfig config; ///< Complete config for controller
-            bool pointTurn; ///< True if doing point turn
             bool configured; ///< True if correctly configured
             base::commands::Motion2D motionCommand; ///< Motion command output of controller
     };
