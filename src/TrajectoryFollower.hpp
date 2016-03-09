@@ -4,6 +4,7 @@
 #include "TrajectoryFollowerTypes.hpp"
 #include "NoOrientationController.hpp"
 #include "ChainedController.hpp"
+#include "SamsonController.hpp"
 
 namespace trajectory_follower
 {
@@ -77,6 +78,7 @@ private:
 
     NoOrientationController noOrientationController; ///< No orientation controller
     ChainedController chainedController; ///< Chained controller
+    SamsonController samsonController;
 
     FollowerData data; ///< Follower data
     ControllerConfig controllerConf;

@@ -47,6 +47,9 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
         // Chained controller
         chainedController = ChainedController(followerConfig.chainedControllerConfig);
         controllerConf = followerConfig.chainedControllerConfig;
+    } else if (controllerType == CONTROLLER_SAMSON) { 
+        samsonController = SamsonController(followerConfig.samsonControllerConfig);
+        controllerConf = followerConfig.samsonControllerConfig;
     } else {
         throw std::runtime_error("Wrong controller type given, it should be  "
                                  "either CONTROLLER_NO_ORIENTATION (0) or CONTROLLER_CHAINED (1).");
@@ -121,6 +124,8 @@ void TrajectoryFollower::setNewTrajectory( const base::Trajectory &trajectory_,
             data.followerStatus = INITIAL_STABILITY_FAILED;
             return;
         }
+    } else if (controllerType == trajectory_follower::CONTROLLER_SAMSON) {
+        samsonController.reset();
     }
 }
 
@@ -310,6 +315,9 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(
             // Chained controller update
             motionCmd = chainedController.update(trajectory.speed, data.distanceError, data.angleError,
                                                  data.curvature, data.variationOfCurvature);
+        } else if (controllerType == CONTROLLER_SAMSON) {
+            motionCmd = samsonController.update(trajectory.speed, data.distanceError, data.angleError,
+                                                data.curvature, data.variationOfCurvature);
         }
 
         while (motionCmd.rotation > 2*M_PI || motionCmd.rotation < -2*M_PI)

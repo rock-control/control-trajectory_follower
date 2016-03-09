@@ -49,7 +49,8 @@ enum ControllerType
 {
     CONTROLLER_UNKNOWN = -1,
     CONTROLLER_NO_ORIENTATION = 0,
-    CONTROLLER_CHAINED = 1
+    CONTROLLER_CHAINED = 1,
+    CONTROLLER_SAMSON
 };
 
 struct ControllerConfig
@@ -113,6 +114,19 @@ struct ChainedControllerConfig : public ControllerConfig
     }
 };
 
+struct SamsonControllerConfig : public ControllerConfig
+{
+    double K2;
+    double K3;
+
+    SamsonControllerConfig()
+        : ControllerConfig()
+    {
+        K2 = base::unset< double >();
+        K3 = base::unset< double >();
+    }
+};
+
 /** Combined config */
 struct FollowerConfig
 {
@@ -126,6 +140,7 @@ struct FollowerConfig
     ///< for no_orientation controller
     ChainedControllerConfig chainedControllerConfig; ///< Config for
     ///< Chained controller
+    SamsonControllerConfig samsonControllerConfig;
 };
 
 /** Data for the follower */
