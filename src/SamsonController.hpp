@@ -2,6 +2,7 @@
 #define TRAJECTORY_FOLLOWER_SAMSON_CONTROLLER
 
 #include "TrajectoryFollowerTypes.hpp"
+#include "Motion2D.hpp"
 
 namespace trajectory_follower
 {
@@ -15,13 +16,13 @@ namespace trajectory_follower
             SamsonController(const SamsonControllerConfig& config_);
 
             void configure(const SamsonControllerConfig& config_);
-            void reset() { }
-            const base::commands::Motion2D& update( double u1, double d, double theta_e, double c, double c_s );
+            void reset() { };
+            const Motion2D& update(double u1, double d, double theta_e, double c, double c_s);
 
         protected:
             SamsonControllerConfig config;
             bool configured;
-            base::commands::Motion2D motionCommand;
+            Motion2D motionCommand;
     };
 }
 

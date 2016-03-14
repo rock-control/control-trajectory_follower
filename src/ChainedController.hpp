@@ -22,6 +22,7 @@
 #define  TRAJECTORYCONTROLLER_PI_INC
 
 #include "TrajectoryFollowerTypes.hpp"
+#include "Motion2D.hpp"
 
 namespace trajectory_follower
 {
@@ -32,25 +33,19 @@ namespace trajectory_follower
     {
         public:
             ChainedController();
-            ChainedController( const ChainedControllerConfig& config_ );
+            ChainedController(const ChainedControllerConfig& config_);
 
-            void configure( const ChainedControllerConfig& config_ );
+            void configure(const ChainedControllerConfig& config_);
             inline void reset() { z0 = 0.0; }
-
-            const base::commands::Motion2D& update( double u1, double d, 
-                    double theta_e, double c, double c_s );
-
-            bool initialStable(double d , double theta_e, double c, 
-                    double c_max);
+            const Motion2D& update(double u1, double d, double theta_e, double c, double c_s);
+            bool initialStable(double d , double theta_e, double c, double c_max);
 
         protected:
             ChainedControllerConfig config; ///< Complete config for controller
             bool configured; ///< True if correctly configured
-
             double z0; ///< Integral term
-
-            base::commands::Motion2D motionCommand; ///< Motion command 
-                                                    ///< output of controller
+            Motion2D motionCommand; ///< Motion command 
+                                    ///< output of controller
     };
 }
 

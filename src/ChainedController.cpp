@@ -23,27 +23,27 @@
 using namespace trajectory_follower;
 
 ChainedController::ChainedController()
-: configured( false ),
-    z0( 0 )
+    : configured(false),
+      z0(0)
 {
 }
 
-ChainedController::ChainedController( const ChainedControllerConfig& config_ )
-: configured( false ),
-    z0( 0 )
+ChainedController::ChainedController(const ChainedControllerConfig& config_)
+    : configured(false),
+      z0(0)
 {
-    configure( config_ );
+    configure(config_);
 }
 
-void ChainedController::configure( const ChainedControllerConfig& config_ )
+void ChainedController::configure(const ChainedControllerConfig& config_)
 {
     config = config_;
-    if( config.K2 <= 0 || config.K3 <= 0 )
+    if(config.K2 <= 0 || config.K3 <= 0)
     {
         throw std::runtime_error("K2 & K3 value must be greater than zero.");
     }
 
-    if( config.K0 <= 0 || base::isUnset< double >( config.K0 ) )
+    if(config.K0 <= 0 || base::isUnset< double >(config.K0))
     {
         LOG_INFO_S << "ChainedController disabling integral";
         // Disabling integral
@@ -53,8 +53,7 @@ void ChainedController::configure( const ChainedControllerConfig& config_ )
     reset();
 }
 
-const base::commands::Motion2D& ChainedController::update( double u1, 
-        double d, double theta_e, double c, double c_s )
+const Motion2D& ChainedController::update(double u1, double d, double theta_e, double c, double c_s)
 {
     double d_dot, s_dot, z2, z3, v1, v2, u2;
     

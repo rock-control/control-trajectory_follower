@@ -5,6 +5,7 @@
 #include "NoOrientationController.hpp"
 #include "ChainedController.hpp"
 #include "SamsonController.hpp"
+#include "SubTrajectory.hpp"
 
 namespace trajectory_follower
 {
@@ -30,8 +31,7 @@ public:
      *
      * Here it checks for the initial stability of the trajectory
      */
-    void setNewTrajectory( const base::Trajectory &trajectory_,
-                           const base::Pose& robotPose );
+    void setNewTrajectory(const SubTrajectory &trajectory, const base::Pose& robotPose);
 
     /**
      * Marks the current trajectory as traversed
@@ -40,28 +40,27 @@ public:
      */
     inline void removeTrajectory()
     {
-        data.followerStatus = TRAJECTORY_FINISHED;
+        followerStatus = TRAJECTORY_FINISHED;
     }
 
     /**
      * Generates motion commands that should make the robot follow the
      * trajectory
      */
-    FollowerStatus traverseTrajectory( base::commands::Motion2D &motionCmd,
-                                       const base::Pose &robotPose );
+    FollowerStatus traverseTrajectory(Motion2D &motionCmd, const base::Pose &robotPose);
 
     /** Computes the reference pose and the error relative to this pose */
-    void computeErrors( const base::Pose& robotPose );
+    void computeErrors(const base::Pose& robotPose);
 
     /** Converts all values to within +/- M_PI */
-    double angleLimit( double angle );
+    double angleLimit(double angle);
 
     /** Returns the current follower data */
     const FollowerData& getData() {
-        return data;
+        return followerData;
     }
     
-    void checkTurnOnSpot();
+    bool checkTurnOnSpot();
 
 private:
     bool configured; ///< True if configured properly
@@ -69,19 +68,25 @@ private:
     double dampingCoefficient;
     bool pointTurn;
     double pointTurnDirection;
+    base::Pose currentPose;
+    base::Pose lastPose;
+    double lastPosError;
+    double currentCurveParameter;
+    double distanceError;
+    double angleError, lastAngleError;
+    double posError;
+    double splineReferenceErrorCoefficient;
+    FollowerData followerData;
+    FollowerStatus followerStatus;
 
-    base::Trajectory trajectory; ///< Active trajectory
-
-    base::Pose poseTransform; ///< Transforms robot pose to center of rotation pose
-    TrajectoryConfig trajectoryConfig; ///< Config for trajectory
+    SubTrajectory trajectory; ///< Active trajectory
     ControllerType controllerType; ///< Controller type
 
     NoOrientationController noOrientationController; ///< No orientation controller
     ChainedController chainedController; ///< Chained controller
     SamsonController samsonController;
 
-    FollowerData data; ///< Follower data
-    ControllerConfig controllerConf;
+    FollowerConfig followerConf;
 };
 
 }

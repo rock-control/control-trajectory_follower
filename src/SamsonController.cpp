@@ -3,12 +3,12 @@
 using namespace trajectory_follower;
 
 SamsonController::SamsonController()
-: configured( false )
+    : configured(false)
 {
 }
 
 SamsonController::SamsonController(const SamsonControllerConfig& config_)
-: configured( false )
+    : configured(false)
 {
     configure(config_);
 }
@@ -16,7 +16,7 @@ SamsonController::SamsonController(const SamsonControllerConfig& config_)
 void SamsonController::configure(const SamsonControllerConfig& config_)
 {
     config = config_;
-    if( config.K2 <= 0 || config.K3 <= 0 )
+    if(config.K2 <= 0 || config.K3 <= 0)
     {
         throw std::runtime_error("K2 & K3 value must be greater than zero.");
     }
@@ -25,8 +25,7 @@ void SamsonController::configure(const SamsonControllerConfig& config_)
     reset();
 }
 
-const base::commands::Motion2D& SamsonController::update( double u1, 
-        double d, double theta_e, double c, double c_s )
+const Motion2D& SamsonController::update(double u1, double d, double theta_e, double c, double c_s)
 {
     double u2;
     

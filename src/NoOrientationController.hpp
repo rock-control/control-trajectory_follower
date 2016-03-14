@@ -21,6 +21,7 @@
 #define  TRAJECTORYCONTROLLER_NOORIENTATION_INC
 
 #include "TrajectoryFollowerTypes.hpp"
+#include "Motion2D.hpp"
 
 namespace trajectory_follower
 {
@@ -32,22 +33,20 @@ namespace trajectory_follower
         public:
             /** Constuctor */
             NoOrientationController();
-            NoOrientationController( 
-                    const NoOrientationControllerConfig& config_ );
+            NoOrientationController(const NoOrientationControllerConfig& config_);
 
             inline const NoOrientationControllerConfig& getConfig() 
             { return config; }
 
-            void configure( const NoOrientationControllerConfig& config_ );
+            void configure(const NoOrientationControllerConfig& config_);
             inline void reset() {}
-
-            bool initialStable( double d , double theta_e, double c_max );
-            const base::commands::Motion2D& update( double u1, double d, double theta_e );
+            bool initialStable(double d, double theta_e, double c_max);
+            const Motion2D& update(double u1, double d, double theta_e);
 
         protected:
             NoOrientationControllerConfig config; ///< Complete config for controller
             bool configured; ///< True if correctly configured
-            base::commands::Motion2D motionCommand; ///< Motion command output of controller
+            Motion2D motionCommand; ///< Motion command output of controller
     };
 }
 
