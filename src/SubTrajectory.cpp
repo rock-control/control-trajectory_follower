@@ -7,7 +7,7 @@ using namespace trajectory_follower;
 
 std::pair<bool, double> oriFinder(double start_t, double end_t, double searchedValue, const base::geometry::Spline<1> &spline);
 
-static double angleLimit(double angle)
+double SubTrajectory::angleLimit(double angle)
 {
     if(angle > M_PI)
         return angle - 2*M_PI;
@@ -202,14 +202,6 @@ std::pair< double, double > SubTrajectory::error(const Eigen::Vector2d& pos, dou
     targetCurveParam = getClosestPoint(base::Pose2D(targetPose, currentHeading), targetCurveParam, advance(curveParam, -std::abs(forwardLen)), advance(targetCurveParam, std::abs(forwardLen)));
     double distanceError = posSpline.distanceError(Eigen::Vector3d(pos.x(), pos.y(), 0.), curveParam);
     double headingError = posSpline.headingError(heading, curveParam);
-
-    switch(driveMode) {
-    case ModeDiagonal:
-        headingError = 0.; //posSpline.getHeading(curveParam) - posSpline.getHeading(targetCurveParam);
-        break;
-    default:
-        break;
-    }
         
     return std::make_pair(distanceError, headingError);
 }
@@ -256,7 +248,7 @@ double SubTrajectory::getClosestPoint(const base::Pose2D& pose, double guess, do
     return posSpline.localClosestPointSearch(Eigen::Vector3d(pose.position.x(), pose.position.y(), 0.), guess, start, end);
 }
 
-double SubTrajectory::getCurvature(double param) const
+double SubTrajectory::getCurvature(double param)
 {
     return posSpline.getCurvature(param);
 }

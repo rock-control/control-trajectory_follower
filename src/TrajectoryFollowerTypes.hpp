@@ -18,7 +18,8 @@ enum FollowerStatus
     TRAJECTORY_FINISHED,
     INITIAL_STABILITY_FAILED,
     EXEC_TURN_ON_SPOT,
-    EXEC_LATERAL
+    EXEC_LATERAL,
+    SLAM_POSE_CHECK_FAILED
 };
 
 /** Controller Types */
@@ -97,6 +98,7 @@ struct FollowerConfig
     double splineReferenceErrorMarginCoefficient;
     double maxForwardLenght, maxBackwardLenght;
     bool usePoseErrorReachedEndCheck;
+    double slamPoseErrorCheckEllipseX, slamPoseErrorCheckEllipseY;
 
     FollowerConfig()
         : dampingAngleUpperLimit(base::unset< double >()),
@@ -110,6 +112,8 @@ struct FollowerConfig
           splineReferenceErrorMarginCoefficient(base::unset< double >()),
           maxForwardLenght(base::unset< double >()),
           maxBackwardLenght(base::unset< double >()),
+          slamPoseErrorCheckEllipseX(base::unset< double >()),
+          slamPoseErrorCheckEllipseY(base::unset< double >()),
           usePoseErrorReachedEndCheck(false)
     {
     }

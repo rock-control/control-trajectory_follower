@@ -40,7 +40,7 @@ struct Motion2D {
     Motion2D(double translation, double rotation, double orientation)
         : translation(translation)
         , rotation(rotation)
-        , heading(heading)
+        , heading(orientation)
     {
         driveMode = ModeAckermann;
     }

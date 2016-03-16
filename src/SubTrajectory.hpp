@@ -24,6 +24,8 @@ public:
 
     SubTrajectory(const base::Trajectory &trajectory);
     
+    static double angleLimit(double angle);
+    
     base::Trajectory toBaseTrajectory();
 
     /**
@@ -86,7 +88,7 @@ public:
     double getDistToGoal(double startParam) const;
     std::pair<double, double> error(const Eigen::Vector2d &pos, double currentHeading, double curveParam, double forwardDist);
     double advance(double curveParam, double length);
-    double getCurvature(double param) const;
+    double getCurvature(double param);
     double getCurvatureMax();
     double getVariationOfCurvature(double param);
     const base::Pose2D &getStartPose() const;

@@ -5,14 +5,86 @@
 
 using namespace trajectory_follower;
 
-double TrajectoryFollower::angleLimit( double angle )
+Motion2D& NoOrientationController::update(double speed, double distanceError, double angleError, double curvature, double variationOfCurvature)
 {
-    if(angle > M_PI)
-        return angle - 2*M_PI;
-    else if(angle < -M_PI)
-        return angle + 2*M_PI;
-    else
-        return angle;
+    if (!configured)
+    {
+        throw std::runtime_error("controller is not configured.");
+    }
+
+    double u1, u2;
+    u1 = speed;
+    double direction = 1.;
+    if (speed < 0)
+    {
+        // Backward motion
+        direction = -1.;
+        u1 = fabs(u1);
+    }
+    // No orientation controller ( Page 806 ), Assuming k(d,theta_e)=K0*cos(theta_e)
+    u2 = -u1 * (tan(angleError) / l1 + distanceError * K0);
+
+    motionCommand.translation = u1 * direction;
+    motionCommand.rotation = u2;
+    return motionCommand;
+}
+
+Motion2D& ChainedController::update(double speed, double distanceError, double angleError, double curvature, double variationOfCurvature)
+{
+    if (!configured)
+    {
+        throw std::runtime_error("controller is not configured.");
+    }
+
+    double d_dot, s_dot, z2, z3, v1, v2, u1, u2;
+    u1 = speed;
+
+    double direction = 1.0;
+    if(speed < 0) {
+        // Backward motion
+        direction = -1.0;
+        u1 = fabs(u1);
+    }
+
+    d_dot = u1 * sin(angleError);
+    s_dot = u1 * cos(angleError) / (1.0-distanceError*curvature);
+
+    v1 = s_dot;
+    z2 = distanceError;
+    z3 = (1.0-(distanceError*curvature))*tan(angleError);
+
+    controllerIntegral += (s_dot * z2);
+    v2 = -fabs(v1)*K0*controllerIntegral - v1*K2*z2 - fabs(v1)*K3 * z3;
+    u2 = (v2 + (d_dot*curvature + distanceError*variationOfCurvature*s_dot)*tan(angleError))
+          /((1.0-distanceError*curvature)*(1+pow(tan(angleError),2))) + s_dot*curvature;
+
+    motionCommand.translation = u1*direction;
+    motionCommand.rotation = u2;
+    return motionCommand;
+}
+
+Motion2D& SamsonController::update(double speed, double distanceError, double angleError, double curvature, double variationOfCurvature)
+{
+    if (!configured)
+    {
+        throw std::runtime_error("controller is not configured.");
+    }
+
+    double u1, u2;
+    u1 = speed;
+
+    double direction = 1.;
+    if(u1 < 0) {
+        // Backward motion
+        direction = -1.;
+        u1 = fabs(u1);
+    }
+
+    u2 = -K2*distanceError*u1*(sin(angleError)/angleError) - K3*angleError;
+
+    motionCommand.translation = u1*direction;
+    motionCommand.rotation = u2;
+    return motionCommand;
 }
 
 TrajectoryFollower::TrajectoryFollower()
@@ -37,17 +109,19 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     dampingCoefficient = base::unset< double >();
 
     // Configures the controller according to controller type
-    if(controllerType == CONTROLLER_NO_ORIENTATION) {
-        // No orientation controller
-        noOrientationController = NoOrientationController(followerConfig.noOrientationControllerConfig);
-    } else if (controllerType == CONTROLLER_CHAINED) {
-        // Chained controller
-        chainedController = ChainedController(followerConfig.chainedControllerConfig);
-    } else if (controllerType == CONTROLLER_SAMSON) {
-        samsonController = SamsonController(followerConfig.samsonControllerConfig);
-    } else {
-        throw std::runtime_error("Wrong controller type given, it should be  "
-                                 "either CONTROLLER_NO_ORIENTATION (0) or CONTROLLER_CHAINED (1).");
+    switch (controllerType) {
+    case CONTROLLER_NO_ORIENTATION:
+        controller = new NoOrientationController(followerConf.noOrientationControllerConfig);
+        break;
+    case CONTROLLER_CHAINED:
+        controller = new ChainedController(followerConf.chainedControllerConfig);
+        break;
+    case CONTROLLER_SAMSON:
+        controller = new SamsonController(followerConf.samsonControllerConfig);
+        break;
+    default:
+        throw std::runtime_error("Wrong or no controller type given.");
+        break;
     }
 
     if (!base::isUnset< double >(followerConf.dampingAngleUpperLimit))
@@ -66,6 +140,8 @@ void TrajectoryFollower::setNewTrajectory(const SubTrajectory &trajectory, const
     if (!configured)
         throw std::runtime_error("TrajectoryFollower not configured.");
 
+    controller->reset();
+
     // Sets the trajectory
     this->trajectory = trajectory;
     nearEnd = false;
@@ -76,9 +152,8 @@ void TrajectoryFollower::setNewTrajectory(const SubTrajectory &trajectory, const
     // Curve parameter and length
     currentPose = robotPose;
     lastPose = currentPose;
-    lastPosError = lastAngleError =std::numeric_limits< double >::max();
     currentCurveParameter = this->trajectory.getStartParam();
-    distanceError = angleError = 0.;
+    lastPosError = lastAngleError = distanceError = angleError = 0.;
     posError = lastPosError;
 
     followerData.currentPose.position = currentPose.position;
@@ -89,40 +164,7 @@ void TrajectoryFollower::setNewTrajectory(const SubTrajectory &trajectory, const
     followerData.currentTrajectory.clear();
     followerData.currentTrajectory.push_back(this->trajectory.toBaseTrajectory());
 
-    // Computes the current pose, reference pose and the errors
-    computeErrors(robotPose);
-
-    followerData.angleError = angleError;
-    followerData.distanceError = distanceError;
-
     followerStatus = TRAJECTORY_FOLLOWING;
-    if (trajectory.driveMode == ModeDiagonal)
-        followerStatus = EXEC_LATERAL;
-
-    // Initialize based on controller type
-    if (controllerType == CONTROLLER_NO_ORIENTATION) {
-        // Resets the controlelr
-        noOrientationController.reset();
-
-        // Checks initial stability of the trajectory
-        if (!checkTurnOnSpot() && !noOrientationController.initialStable(distanceError,
-                angleError, this->trajectory.getCurvatureMax())) {
-            followerStatus = INITIAL_STABILITY_FAILED;
-            return;
-        }
-    } else if (controllerType == CONTROLLER_CHAINED) {
-        // Reset the controller
-        chainedController.reset();
-
-        // Checks initial stability of the trajectory
-        if (!checkTurnOnSpot() && !chainedController.initialStable(distanceError, angleError,
-                this->trajectory.getCurvature(currentCurveParameter), this->trajectory.getCurvatureMax()) ) {
-            followerStatus = INITIAL_STABILITY_FAILED;
-            return;
-        }
-    } else if (controllerType == trajectory_follower::CONTROLLER_SAMSON) {
-        samsonController.reset();
-    }
 }
 
 void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
@@ -135,7 +177,7 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
 
     // Change heading based on direction of motion
     if(!trajectory.driveForward())
-        currentHeading = angleLimit(currentHeading + M_PI);
+        currentHeading = SubTrajectory::angleLimit(currentHeading + M_PI);
 
     Eigen::Vector2d movementVector = currentPose.position.head(2) - lastPose.position.head(2);
     double distanceMoved = movementVector.norm();
@@ -181,13 +223,32 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
     motionCmd.heading = 0;
 
     // Return if there is no trajectory to follow
-    if(followerStatus != TRAJECTORY_FOLLOWING && followerStatus != EXEC_TURN_ON_SPOT && followerStatus != EXEC_LATERAL) {
+    if(followerStatus == TRAJECTORY_FINISHED) {
         LOG_INFO_S << "Trajectory follower not active";
         return followerStatus;
     }
 
-    lastPose = currentPose;
-    currentPose = robotPose;
+    if (!base::isUnset<double>(followerConf.slamPoseErrorCheckEllipseX) && !base::isUnset<double>(followerConf.slamPoseErrorCheckEllipseY)) {
+        double rx = std::min(followerConf.slamPoseErrorCheckEllipseX, 0.6), ry = std::min(followerConf.slamPoseErrorCheckEllipseY, 0.45);
+        rx = std::max(rx, 0.01), ry = std::max(ry, 0.01);
+        double angle = currentPose.getYaw()+angleError;
+        double slamPoseCheckVal = [](double x, double y, double a, double b, double angle, double x0, double y0) {
+            return std::pow(std::cos(angle)*(x - x0) + std::sin(angle)*(y - y0), 2)/std::pow(a, 2)
+                   + std::pow(std::sin(angle)*(x - x0) - std::cos(angle)*(y - y0), 2)/std::pow(b, 2);
+        }(robotPose.position.x(), robotPose.position.y(), rx, ry, angle, currentPose.position.x(), currentPose.position.y());
+
+        if (!(slamPoseCheckVal <= 1.)) {
+            if (followerStatus != SLAM_POSE_CHECK_FAILED) {
+                std::cout << "SLAM_POSE_CHECK_FAILED! slamPoseCheckVal is " << slamPoseCheckVal << std::endl;
+                lastFollowerStatus = followerStatus;
+                followerStatus = SLAM_POSE_CHECK_FAILED;
+            }
+
+            return followerStatus;
+        } else if (followerStatus == SLAM_POSE_CHECK_FAILED) {
+            followerStatus = lastFollowerStatus;
+        }
+    }
 
     computeErrors(robotPose);
 
@@ -256,25 +317,8 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         }
     }
 
-    // If trajectory follower running call the controller based on the
-    // controller type
-    if (controllerType == CONTROLLER_NO_ORIENTATION) {
-        // No orientation controller update
-        motionCmd = noOrientationController.update(trajectory.getSpeed(), distanceError, angleError);
-    } else if (controllerType == CONTROLLER_CHAINED) {
-        // Chained controller update
-        motionCmd = chainedController.update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
-                                             trajectory.getVariationOfCurvature(currentCurveParameter));
-    } else if (controllerType == CONTROLLER_SAMSON) {
-        motionCmd = samsonController.update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
-                                            trajectory.getVariationOfCurvature(currentCurveParameter));
-    }
-
-    if (trajectory.driveMode == ModeDiagonal)
-    {
-        motionCmd.rotation = angleLimit(trajectory.splineHeading(currentCurveParameter));
-        motionCmd.heading = trajectory.splineHeading(currentCurveParameter) - refPose.orientation;
-    }
+    motionCmd = controller->update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
+                                   trajectory.getVariationOfCurvature(currentCurveParameter));
 
     while (motionCmd.rotation > 2*M_PI || motionCmd.rotation < -2*M_PI)
         motionCmd.rotation += (motionCmd.rotation > 2*M_PI ? -1 : 1)*2*M_PI;
