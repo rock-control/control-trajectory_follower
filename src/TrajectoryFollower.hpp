@@ -180,10 +180,11 @@ public:
 
 private:
     bool configured;
-    bool nearEnd;
-    double dampingCoefficient;
+    ControllerType controllerType;
     bool pointTurn;
     double pointTurnDirection;
+    bool nearEnd;
+    double dampingCoefficient;
     base::Pose currentPose;
     base::Pose lastPose;
     double lastPosError;
@@ -195,7 +196,6 @@ private:
     FollowerData followerData;
     FollowerStatus followerStatus, lastFollowerStatus;
     SubTrajectory trajectory;
-    ControllerType controllerType;
     FollowerConfig followerConf;
     Controller *controller;
 };

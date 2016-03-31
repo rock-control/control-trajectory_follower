@@ -97,8 +97,8 @@ struct FollowerConfig
     double splineReferenceError;
     double splineReferenceErrorMarginCoefficient;
     double maxForwardLenght, maxBackwardLenght;
-    bool usePoseErrorReachedEndCheck;
     double slamPoseErrorCheckEllipseX, slamPoseErrorCheckEllipseY;
+    bool usePoseErrorReachedEndCheck;
 
     FollowerConfig()
         : dampingAngleUpperLimit(base::unset< double >()),

@@ -101,9 +101,9 @@ TrajectoryFollower::TrajectoryFollower()
 TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     : configured(false),
       controllerType(followerConfig.controllerType),
-      followerConf(followerConfig),
       pointTurn(false),
-      pointTurnDirection(1.)
+      pointTurnDirection(1.),
+      followerConf(followerConfig)
 {
     followerStatus = TRAJECTORY_FINISHED;
     dampingCoefficient = base::unset< double >();
@@ -320,8 +320,15 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
     motionCmd = controller->update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
                                    trajectory.getVariationOfCurvature(currentCurveParameter));
 
-    while (motionCmd.rotation > 2*M_PI || motionCmd.rotation < -2*M_PI)
-        motionCmd.rotation += (motionCmd.rotation > 2*M_PI ? -1 : 1)*2*M_PI;
+    while (motionCmd.rotation > 2*M_PI)
+    {
+        motionCmd.rotation -= 2*M_PI;
+    }
+    
+    while (motionCmd.rotation < -2*M_PI)
+    {
+        motionCmd.rotation += 2*M_PI;
+    }
 
     // HACK: use damping factor to prevend oscillating steering behavior
     if (!base::isUnset<double>(followerConf.dampingAngleUpperLimit) && followerConf.dampingAngleUpperLimit > 0)

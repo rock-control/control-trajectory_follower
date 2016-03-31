@@ -196,7 +196,7 @@ std::pair< double, double > SubTrajectory::error(const Eigen::Vector2d& pos, dou
     if(!driveForward())
         heading = angleLimit(currentHeading + M_PI);
     double forwardLen = std::max(std::abs(forwardDist), 0.01);
-    copysign(forwardLen, forwardDist);
+    forwardLen = copysign(forwardLen, forwardDist);
     targetCurveParam = advance(targetCurveParam, std::abs(forwardLen));
     targetPose += Eigen::Rotation2Dd(currentHeading) * Eigen::Vector2d(forwardLen, 0.);
     targetCurveParam = getClosestPoint(base::Pose2D(targetPose, currentHeading), targetCurveParam, advance(curveParam, -std::abs(forwardLen)), advance(targetCurveParam, std::abs(forwardLen)));
@@ -358,7 +358,7 @@ void SubTrajectory::setSpeed(double speed) {
 }
 
 double SubTrajectory::splineHeading(double param) {
-    posSpline.getHeading(param);
+    return posSpline.getHeading(param);
 }
 
 std::pair<bool, double> oriFinder(double start_t, double end_t, double searchedValue, const base::geometry::Spline<1> &spline)

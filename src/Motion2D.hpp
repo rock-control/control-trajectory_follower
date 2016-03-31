@@ -16,24 +16,24 @@ enum DriveMode {
 
 struct Motion2D {
     double translation;
+    double rotation;
     double heading;     // relative to current robot heading
                         // zero means no variation of heading
-    double rotation;
     DriveMode driveMode;
     
     Motion2D()
         : translation(0.)
-        , heading(0.)
         , rotation(0.)
+        , heading(0.)
         , driveMode(ModeAckermann)
     {
     }
 
     Motion2D(const Eigen::Vector2d &translation, double rotation)
-        : rotation(rotation)
+        : translation((Eigen::Vector2d(translation.x(), 0) + Eigen::Vector2d(0, translation.y())).norm())
+        , rotation(rotation)
     {
         this->heading = atan2(translation.y(), translation.x());
-        this->translation = (Eigen::Vector2d(translation.x(), 0) + Eigen::Vector2d(0, translation.y())).norm();
         driveMode = ModeAckermann;
     }
 
