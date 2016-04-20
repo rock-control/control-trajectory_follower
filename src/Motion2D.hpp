@@ -19,13 +19,11 @@ struct Motion2D {
     double rotation;
     double heading;     // relative to current robot heading
                         // zero means no variation of heading
-    DriveMode driveMode;
     
     Motion2D()
         : translation(0.)
         , rotation(0.)
         , heading(0.)
-        , driveMode(ModeAckermann)
     {
     }
 
@@ -34,7 +32,6 @@ struct Motion2D {
         , rotation(rotation)
     {
         this->heading = atan2(translation.y(), translation.x());
-        driveMode = ModeAckermann;
     }
 
     Motion2D(double translation, double rotation, double orientation)
@@ -42,10 +39,22 @@ struct Motion2D {
         , rotation(rotation)
         , heading(orientation)
     {
-        driveMode = ModeAckermann;
     }
     
-    base::commands::Motion2D toBaseMotion2D() {
+    DriveMode getDriveMode()
+    {
+        if (translation == 0)
+        {
+            return ModeTurnOnTheSpot;
+        }
+        else
+        {
+            return ModeAckermann;
+        }
+    }
+    
+    base::commands::Motion2D toBaseMotion2D()
+    {
         base::commands::Motion2D cmd;
         cmd.rotation = this->rotation;
         cmd.translation = this->translation;
