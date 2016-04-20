@@ -161,6 +161,8 @@ void TrajectoryFollower::setNewTrajectory(const SubTrajectory &trajectory, const
     base::Pose2D refPose = this->trajectory.getIntermediatePoint(currentCurveParameter);
     followerData.splineReference.position = Eigen::Vector3d(refPose.position.x(), refPose.position.y(), 0.);
     followerData.splineReference.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(refPose.orientation, Eigen::Vector3d::UnitZ()));
+    followerData.splineSegmentStart = followerData.splineReference;
+    followerData.splineSegmentEnd = followerData.splineReference;
     followerData.currentTrajectory.clear();
     followerData.currentTrajectory.push_back(this->trajectory.toBaseTrajectory());
 
@@ -207,7 +209,17 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     splineSegmentStartCurveParam = trajectory.advance(currentCurveParameter, -backwardLength);
     splineSegmentEndCurveParam = trajectory.advance(currentCurveParameter, forwardLength);
     splineSegmentGuessCurveParam = trajectory.advance(currentCurveParameter, dist);
-
+    
+    base::Pose2D splineStartPoint, splineEndPoint;
+    splineStartPoint = trajectory.getIntermediatePoint(splineSegmentStartCurveParam);
+    splineEndPoint = trajectory.getIntermediatePoint(splineSegmentEndCurveParam);
+    followerData.splineSegmentStart.position.x() = splineStartPoint.position.x();
+    followerData.splineSegmentStart.position.y() = splineStartPoint.position.y();
+    followerData.splineSegmentEnd.position.x() = splineEndPoint.position.x();
+    followerData.splineSegmentEnd.position.y() = splineEndPoint.position.y();
+    followerData.splineSegmentStart.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineStartPoint.orientation, Eigen::Vector3d::UnitZ()));
+    followerData.splineSegmentEnd.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineEndPoint.orientation, Eigen::Vector3d::UnitZ()));
+    
     currentCurveParameter = trajectory.getClosestPoint(currentPose, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
 
     auto err = trajectory.error(Eigen::Vector2d(currentPose.position.x(), currentPose.position.y()), currentPose.getYaw(), currentCurveParameter, 0.);

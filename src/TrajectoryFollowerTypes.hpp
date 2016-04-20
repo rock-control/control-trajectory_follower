@@ -128,6 +128,7 @@ struct FollowerData
     base::samples::RigidBodyState currentPose;
     std::vector< base::Trajectory > currentTrajectory;
     base::commands::Motion2D cmd;
+    base::samples::RigidBodyState splineSegmentStart, splineSegmentEnd;
 };
 
 }
