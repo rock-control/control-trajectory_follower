@@ -14,7 +14,7 @@ public:
     {
     }
     
-    virtual ~Controller() = 0;
+    virtual ~Controller();
 
     virtual Motion2D& update(double speed, double distanceError, double angleError, double curvature, double variationOfCurvature) =0;
     virtual void reset() =0;
