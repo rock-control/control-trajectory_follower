@@ -45,11 +45,24 @@ struct Motion2D {
         driveMode = ModeAckermann;
     }
     
-    base::commands::Motion2D toBaseMotion2D() {
+    base::commands::Motion2D toBaseMotion2D() 
+    {
         base::commands::Motion2D cmd;
         cmd.rotation = this->rotation;
         cmd.translation = this->translation;
         return cmd;
+    }
+    
+    bool operator==(const Motion2D &m) const 
+    {
+        return (m.translation == translation &&
+                m.rotation == rotation &&
+                m.heading == heading);
+    }
+    
+    bool operator!=(const Motion2D &m) const 
+    {
+        return !operator==(m);
     }
 };
 
