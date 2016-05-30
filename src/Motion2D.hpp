@@ -60,6 +60,18 @@ struct Motion2D {
         cmd.translation = this->translation;
         return cmd;
     }
+    
+    bool operator==(const Motion2D &m) const 
+    {
+        return (m.translation == translation &&
+                m.rotation == rotation &&
+                m.heading == heading);
+    }
+    
+    bool operator!=(const Motion2D &m) const 
+    {
+        return !operator==(m);
+    }
 };
 
 }

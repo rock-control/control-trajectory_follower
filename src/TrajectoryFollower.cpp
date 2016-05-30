@@ -5,6 +5,8 @@
 
 using namespace trajectory_follower;
 
+Controller::~Controller(){}
+
 Motion2D& NoOrientationController::update(double speed, double distanceError, double angleError, double curvature, double variationOfCurvature)
 {
     if (!configured)
