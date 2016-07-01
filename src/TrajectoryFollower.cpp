@@ -1,5 +1,5 @@
 #include "TrajectoryFollower.hpp"
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 #include <limits>
 
