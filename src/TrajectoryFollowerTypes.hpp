@@ -101,7 +101,8 @@ struct FollowerConfig
     bool usePoseErrorReachedEndCheck;
 
     FollowerConfig()
-        : dampingAngleUpperLimit(base::unset< double >()),
+        : controllerType(CONTROLLER_UNKNOWN),
+          dampingAngleUpperLimit(base::unset< double >()),
           maxRotationalVelocity(base::unset< double >()),
           pointTurnStart(base::unset< double >()),
           pointTurnEnd(base::unset< double >()),
