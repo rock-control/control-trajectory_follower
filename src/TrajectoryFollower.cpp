@@ -222,7 +222,7 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     followerData.splineSegmentStart.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineStartPoint.orientation, Eigen::Vector3d::UnitZ()));
     followerData.splineSegmentEnd.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineEndPoint.orientation, Eigen::Vector3d::UnitZ()));
     
-    currentCurveParameter = trajectory.getClosestPoint(currentPose, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
+    currentCurveParameter = trajectory.posSpline.localClosestPointSearch(currentPose.position, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
 
     auto err = trajectory.error(Eigen::Vector2d(currentPose.position.x(), currentPose.position.y()), currentPose.getYaw(), currentCurveParameter, 0.);
     distanceError = err.first;
