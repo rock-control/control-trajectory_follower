@@ -87,6 +87,7 @@ public:
     void setGeometricResolution(double geometricResolution);
     double getDistToGoal(double startParam) const;
     std::pair<double, double> error(const Eigen::Vector2d &pos, double currentHeading, double curveParam, double forwardDist);
+    std::pair<double, double> error(const Eigen::Vector2d &pos, double currentHeading, double curveParam);
     double advance(double curveParam, double length);
     double getCurvature(double param);
     double getCurvatureMax();

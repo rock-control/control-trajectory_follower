@@ -188,6 +188,18 @@ double SubTrajectory::advance(double curveParam, double length)
     }
 }
 
+std::pair< double, double > SubTrajectory::error(const Eigen::Vector2d& pos, double currentHeading, double curveParam)
+{
+    double heading = currentHeading;
+    if(!driveForward())
+        heading = angleLimit(currentHeading + M_PI);
+    double distanceError = posSpline.distanceError(Eigen::Vector3d(pos.x(), pos.y(), 0.), curveParam);
+    double headingError = posSpline.headingError(heading, curveParam);
+        
+    return std::make_pair(distanceError, headingError);
+}
+
+
 std::pair< double, double > SubTrajectory::error(const Eigen::Vector2d& pos, double currentHeading, double curveParam, double forwardDist)
 {
     double targetCurveParam = curveParam;

@@ -140,7 +140,7 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     
     currentCurveParameter = trajectory.posSpline.localClosestPointSearch(currentPose.position, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
 
-    auto err = trajectory.error(Eigen::Vector2d(currentPose.position.x(), currentPose.position.y()), currentPose.getYaw(), currentCurveParameter, 0.);
+    auto err = trajectory.error(Eigen::Vector2d(currentPose.position.x(), currentPose.position.y()), currentPose.getYaw(), currentCurveParameter);
     distanceError = err.first;
     lastAngleError = angleError;
     angleError = err.second;
