@@ -326,17 +326,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
     motionCmd = controller->update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
                                    trajectory.getVariationOfCurvature(currentCurveParameter));
 
-    while (motionCmd.rotation > 2*M_PI)
-    {
-        motionCmd.rotation -= 2*M_PI;
-    }
-    
-    while (motionCmd.rotation < -2*M_PI)
-    {
-        motionCmd.rotation += 2*M_PI;
-    }
-
-    // HACK: use damping factor to prevend oscillating steering behavior
+    // HACK: use damping factor to prevent oscillating steering behavior
     if (!base::isUnset<double>(followerConf.dampingAngleUpperLimit) && followerConf.dampingAngleUpperLimit > 0)
     {
         double dampingFactor = std::min(1., std::log(std::abs(base::Angle::fromRad(motionCmd.rotation).getDeg())+1.)*dampingCoefficient);
