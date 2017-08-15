@@ -8,6 +8,10 @@
 #include <base/Trajectory.hpp>
 #include <base/samples/RigidBodyState.hpp>
 
+#include "NoOrientationController.hpp"
+#include "SamsonController.hpp"
+#include "ChainedController.hpp"
+
 namespace trajectory_follower
 {
 
@@ -29,49 +33,6 @@ enum ControllerType
     CONTROLLER_NO_ORIENTATION = 0,
     CONTROLLER_CHAINED = 1,
     CONTROLLER_SAMSON
-};
-
-/** No orientation controller config */
-struct NoOrientationControllerConfig
-{
-    double l1; ///< Position of reference point P(l1,0) on the robot chassis such that l1u1 > 0
-    double K0; ///< Constant for the calculation of k(d, theta_e)
-    bool useForwardAngleError, useForwardDistanceError;
-
-    NoOrientationControllerConfig()
-        : l1(base::unset< double >()),
-          K0(base::unset< double >()),
-          useForwardAngleError(false),
-          useForwardDistanceError(false)
-    {
-    }
-};
-
-/** Chained controller config */
-struct ChainedControllerConfig
-{
-    double K0; ///< Integrator constant
-    double K2; ///< Controller constant
-    double K3; ///< Controller constant
-
-    ChainedControllerConfig()
-        : K0(base::unset< double >()),
-          K2(base::unset< double >()),
-          K3(base::unset< double >())
-    {
-    }
-};
-
-struct SamsonControllerConfig
-{
-    double K2;
-    double K3;
-
-    SamsonControllerConfig()
-        : K2(base::unset< double >()),
-          K3(base::unset< double >())
-    {
-    }
 };
 
 /** Combined config */
