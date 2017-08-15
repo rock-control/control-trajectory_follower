@@ -72,19 +72,11 @@ Motion2D& SamsonController::update(double speed, double distanceError, double an
         throw std::runtime_error("controller is not configured.");
     }
 
-    double u1, u2;
-    u1 = speed;
+    const double u1 = std::abs(speed);
 
-    double direction = 1.;
-    if(u1 < 0) {
-        // Backward motion
-        direction = -1.;
-        u1 = fabs(u1);
-    }
+    const double u2 = -K2*distanceError*u1*(sin(angleError)/angleError) - K3*angleError;
 
-    u2 = -K2*distanceError*u1*(sin(angleError)/angleError) - K3*angleError;
-
-    motionCommand.translation = u1*direction;
+    motionCommand.translation = speed;
     motionCommand.rotation = u2;
     return motionCommand;
 }
