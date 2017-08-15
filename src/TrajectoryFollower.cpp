@@ -238,10 +238,10 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         double rx = std::min(followerConf.slamPoseErrorCheckEllipseX, 0.6), ry = std::min(followerConf.slamPoseErrorCheckEllipseY, 0.45);
         rx = std::max(rx, 0.01), ry = std::max(ry, 0.01);
         double angle = currentPose.getYaw()+angleError;
-        double slamPoseCheckVal = [](double x, double y, double a, double b, double angle, double x0, double y0) {
-            return std::pow(std::cos(angle)*(x - x0) + std::sin(angle)*(y - y0), 2)/std::pow(a, 2)
-                   + std::pow(std::sin(angle)*(x - x0) - std::cos(angle)*(y - y0), 2)/std::pow(b, 2);
-        }(robotPose.position.x(), robotPose.position.y(), rx, ry, angle, currentPose.position.x(), currentPose.position.y());
+
+        const double slamPoseCheckVal = (Eigen::Rotation2Dd(angle) * (robotPose.position.head<2>() - currentPose.position.head<2>()))
+                .cwiseQuotient(Eigen::Vector2d(rx, ry)).squaredNorm();
+
 
         if (!(slamPoseCheckVal <= 1.)) {
             if (followerStatus != SLAM_POSE_CHECK_FAILED) {
