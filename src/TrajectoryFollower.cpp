@@ -104,7 +104,7 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     double movementDirection = atan2(movementVector.y(), movementVector.x());
 
     double direction = 1.;
-    if (std::abs(movementDirection - currentHeading) > base::Angle::fromDeg(90).getRad())
+    if (std::abs(SubTrajectory::angleLimit(movementDirection - currentHeading)) > base::Angle::fromDeg(90).getRad())
         direction = -1.;
 
     double errorMargin = distanceMoved*splineReferenceErrorCoefficient;
