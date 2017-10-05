@@ -1,0 +1,12 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: trajectory_follower-viz
+Description: vizKit plugin for the trajectory_follower library
+Requires: trajectory_follower @PKGCONFIG_DEPS@
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -ltrajectory_follower-viz
+Cflags: -I${includedir}
+
