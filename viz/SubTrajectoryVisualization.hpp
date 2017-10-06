@@ -1,10 +1,9 @@
-#ifndef trajectory_follower_SubTrajectoryVisualization_H
-#define trajectory_follower_SubTrajectoryVisualization_H
+#pragma once
 
 #include <boost/noncopyable.hpp>
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <osg/Geode>
-#include <>
+#include <trajectory_follower/SubTrajectory.hpp>
 
 namespace vizkit3d
 {
@@ -30,4 +29,3 @@ namespace vizkit3d
         Data* p;
     };
 }
-#endif
