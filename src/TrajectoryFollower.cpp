@@ -82,7 +82,7 @@ void TrajectoryFollower::setNewTrajectory(const SubTrajectory &trajectory, const
     followerData.splineSegmentStart = followerData.splineReference;
     followerData.splineSegmentEnd = followerData.splineReference;
     followerData.currentTrajectory.clear();
-    followerData.currentTrajectory.push_back(this->trajectory.toBaseTrajectory());
+    followerData.currentTrajectory.push_back(this->trajectory);
 
     followerStatus = TRAJECTORY_FOLLOWING;
 }
