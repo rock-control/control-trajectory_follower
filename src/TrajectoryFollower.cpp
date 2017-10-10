@@ -29,13 +29,13 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     // Configures the controller according to controller type
     switch (controllerType) {
     case CONTROLLER_NO_ORIENTATION:
-        controller = new NoOrientationController(followerConf.noOrientationControllerConfig);
+        controller.reset(new NoOrientationController(followerConf.noOrientationControllerConfig));
         break;
     case CONTROLLER_CHAINED:
-        controller = new ChainedController(followerConf.chainedControllerConfig);
+        controller.reset(new ChainedController(followerConf.chainedControllerConfig));
         break;
     case CONTROLLER_SAMSON:
-        controller = new SamsonController(followerConf.samsonControllerConfig);
+        controller.reset(new SamsonController(followerConf.samsonControllerConfig));
         break;
     default:
         throw std::runtime_error("Wrong or no controller type given.");

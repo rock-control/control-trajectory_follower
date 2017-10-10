@@ -5,6 +5,7 @@
 #include "SubTrajectory.hpp"
 
 #include "Controller.hpp"
+#include <memory>
 
 namespace trajectory_follower
 {
@@ -77,7 +78,7 @@ private:
     FollowerStatus followerStatus, lastFollowerStatus;
     SubTrajectory trajectory;
     FollowerConfig followerConf;
-    Controller *controller;
+    std::unique_ptr<Controller> controller;
 };
 
 }
