@@ -20,10 +20,10 @@ public:
     /** Default constructor */
     TrajectoryFollower();
 
-    /** Contructor which takes in config.
+    /** Constructor which takes in config.
      *
      * Before using the follower make sure that the object is created
-     * using the correct config and this contructor, otherwise the
+     * using the correct config and this constructor, otherwise the
      * controller will cause runtime error */
     TrajectoryFollower(const FollowerConfig& followerConfig);
 

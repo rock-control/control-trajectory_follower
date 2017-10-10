@@ -49,7 +49,7 @@ public:
 
     /**
      * This method tries to interpolate from a set of poses.
-     * For the direction of orienation change it always assumes
+     * For the direction of orientation change it always assumes
      * the shortest distance.
      *
      * */
@@ -57,7 +57,7 @@ public:
 
     /**
      * This method interpolates a Spline from a set of poses.
-     * For the direction of orientaiton a vector of orientation
+     * For the direction of orientation a vector of orientation
      * differences is given. This enables us to encode things like
      * Pose(0,0,0) -> Pose(1,1,0) With a full turn inbetween.
      * */
@@ -66,7 +66,7 @@ public:
     /**
      * Returns the Pose2D for param d;
      * The Orientation NOT be normalized.
-     * This is helpfull for the calculation of steering parameters.
+     * This is helpful for the calculation of steering parameters.
      * */
     base::Pose2D getIntermediatePoint(double d);
 
