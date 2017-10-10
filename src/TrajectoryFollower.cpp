@@ -99,10 +99,11 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     if(!trajectory.driveForward())
         currentHeading = SubTrajectory::angleLimit(currentHeading + M_PI);
 
-    Eigen::Vector2d movementVector = currentPose.position.head(2) - lastPose.position.head(2);
-    double distanceMoved = movementVector.norm();
-    double movementDirection = atan2(movementVector.y(), movementVector.x());
+    const Eigen::Vector2d movementVector = currentPose.position.head<2>() - lastPose.position.head<2>();
+    const double distanceMoved = movementVector.norm();
+    const double movementDirection = atan2(movementVector.y(), movementVector.x());
 
+    // FIXME direction should simply be `trajectory.driveForward() ? 1.0 : -1.0`
     double direction = 1.;
     if (std::abs(SubTrajectory::angleLimit(movementDirection - currentHeading)) > base::Angle::fromDeg(90).getRad())
         direction = -1.;
@@ -131,16 +132,14 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     base::Pose2D splineStartPoint, splineEndPoint;
     splineStartPoint = trajectory.getIntermediatePoint(splineSegmentStartCurveParam);
     splineEndPoint = trajectory.getIntermediatePoint(splineSegmentEndCurveParam);
-    followerData.splineSegmentStart.position.x() = splineStartPoint.position.x();
-    followerData.splineSegmentStart.position.y() = splineStartPoint.position.y();
-    followerData.splineSegmentEnd.position.x() = splineEndPoint.position.x();
-    followerData.splineSegmentEnd.position.y() = splineEndPoint.position.y();
+    followerData.splineSegmentStart.position.head<2>() = splineStartPoint.position;
+    followerData.splineSegmentEnd.position.head<2>() = splineEndPoint.position;
     followerData.splineSegmentStart.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineStartPoint.orientation, Eigen::Vector3d::UnitZ()));
     followerData.splineSegmentEnd.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineEndPoint.orientation, Eigen::Vector3d::UnitZ()));
     
     currentCurveParameter = trajectory.posSpline.localClosestPointSearch(currentPose.position, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
 
-    auto err = trajectory.error(Eigen::Vector2d(currentPose.position.x(), currentPose.position.y()), currentPose.getYaw(), currentCurveParameter);
+    auto err = trajectory.error(currentPose.position.head<2>(), currentPose.getYaw(), currentCurveParameter);
     distanceError = err.first;
     lastAngleError = angleError;
     angleError = err.second;
