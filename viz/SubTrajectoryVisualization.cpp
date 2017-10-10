@@ -3,6 +3,8 @@
 #include <osgViz/modules/viz/Primitives/PrimitivesFactory.h>
 #include <osgViz/OsgViz.hpp>
 
+#include <osg/LineWidth>
+
 using namespace vizkit3d;
 
 struct SubTrajectoryVisualization::Data {
@@ -11,7 +13,7 @@ struct SubTrajectoryVisualization::Data {
 
 
 SubTrajectoryVisualization::SubTrajectoryVisualization()
-    : p(new Data)
+    : p(new Data), line_width( 1.0 ), color(1., 1., 0., 1.)
 {
 }
 
@@ -27,7 +29,7 @@ osg::ref_ptr<osg::Node> SubTrajectoryVisualization::createMainNode()
 
 void SubTrajectoryVisualization::updateMainNode ( osg::Node* node )
 {
-    osg::PositionAttitudeTransform* geode = static_cast<osg::PositionAttitudeTransform*>(node);
+    geode = static_cast<osg::PositionAttitudeTransform*>(node);
     geode->removeChildren(0, geode->getNumChildren());
 
     osgviz::PrimitivesFactory* fac = osgviz::OsgViz::getInstance()->getModuleInstance<osgviz::PrimitivesFactory>("PrimitivesFactory");
@@ -44,15 +46,54 @@ void SubTrajectoryVisualization::updateMainNode ( osg::Node* node )
         }
     }
     
-    const osg::Vec4 color(1, 1, 0, 1);
     auto prim = fac->createLinesNode(color, osgPoints);
     geode->addChild(prim);
+
+    osg::StateSet* stateset = geode->getOrCreateStateSet();
+    osg::LineWidth* linewidth = new osg::LineWidth();
+    linewidth->setWidth(line_width);
+    stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
+    stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);    
 }
 
 void SubTrajectoryVisualization::updateDataIntern(std::vector<trajectory_follower::SubTrajectory> const& value)
 {
     p->data = value;
 }
+
+void SubTrajectoryVisualization::setColor(QColor color)
+{
+    this->color = osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+    emit propertyChanged("Color");
+    setDirty();
+}
+
+QColor SubTrajectoryVisualization::getColor() const
+{
+    QColor c;
+    c.setRgbF(color.x(), color.y(), color.z(), color.w());
+    return c;
+}
+
+double SubTrajectoryVisualization::getLineWidth()
+{
+    return line_width;
+}
+
+void SubTrajectoryVisualization::setLineWidth(double line_width)
+{
+    this->line_width = line_width;
+    if(geode)
+    {
+        osg::StateSet* stateset = geode->getOrCreateStateSet();
+        osg::LineWidth* linewidth = new osg::LineWidth();
+        linewidth->setWidth(line_width);
+        stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
+        stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
+    }
+    emit propertyChanged("LineWidth");
+}
+
 
 //Macro that makes this plugin loadable in ruby, this is optional.
 VizkitQtPlugin(SubTrajectoryVisualization)
