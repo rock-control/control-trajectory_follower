@@ -7,9 +7,16 @@
 #include <base/Trajectory.hpp>
 #include <stdexcept>
 #include "Motion2D.hpp"
+#include <string>
 
 namespace trajectory_follower {
 
+enum SubTrajectoryKind
+{
+    TRAJECTORY_KIND_NORMAL, //a normal trajectory
+    TRAJECTORY_KIND_RESCUE //a special trajectory that is used to get out of unstable situations
+};
+    
 class SubTrajectory
 {
 public:
@@ -19,14 +26,20 @@ public:
     base::geometry::Spline<3> posSpline;
     base::geometry::Spline<1> orientationSpline;
     DriveMode driveMode;
-
+    
+    /**The kind of this trajectory. This does not influece how the trajectory 
+     * is followed. It is merely metadata. Some tasks may or may not behave differently
+     * if the kind is not NORMAL. */
+    SubTrajectoryKind kind;
+    
+    
     SubTrajectory();
 
     SubTrajectory(const base::Trajectory &trajectory);
     
     static double angleLimit(double angle);
     
-    base::Trajectory toBaseTrajectory();
+    base::Trajectory toBaseTrajectory() const;
 
     /**
      * This method interpolates a point turn SubTrajectory
