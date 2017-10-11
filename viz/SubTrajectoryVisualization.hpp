@@ -15,6 +15,7 @@ namespace vizkit3d
 
     Q_PROPERTY(double LineWidth READ getLineWidth WRITE setLineWidth)
     Q_PROPERTY(QColor Color READ getColor WRITE setColor)
+    Q_PROPERTY(QColor RescueColor READ getRescueColor WRITE setRescueColor)
 
     public:
         SubTrajectoryVisualization();
@@ -28,6 +29,9 @@ namespace vizkit3d
         void setLineWidth(double line_width);
         void setColor(QColor color);
         QColor getColor() const;
+        void setRescueColor(QColor color);
+        QColor getRescueColor() const;
+        
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
@@ -40,6 +44,7 @@ namespace vizkit3d
 
         double line_width;
         osg::Vec4 color;       
+        osg::Vec4 rescueColor;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> geode; 
     };

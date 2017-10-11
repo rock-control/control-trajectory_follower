@@ -13,7 +13,7 @@ struct SubTrajectoryVisualization::Data {
 
 
 SubTrajectoryVisualization::SubTrajectoryVisualization()
-    : p(new Data), line_width( 1.0 ), color(1., 1., 0., 1.)
+    : p(new Data), line_width( 4.0 ), color(1., 1., 0., 1.), rescueColor(1., 0., 0., 1.)
 {
 }
 
@@ -21,7 +21,7 @@ SubTrajectoryVisualization::~SubTrajectoryVisualization()
 {
     delete p;
 }
-
+ 
 osg::ref_ptr<osg::Node> SubTrajectoryVisualization::createMainNode()
 {
     return new osg::PositionAttitudeTransform();
@@ -33,10 +33,10 @@ void SubTrajectoryVisualization::updateMainNode ( osg::Node* node )
     geode->removeChildren(0, geode->getNumChildren());
 
     osgviz::PrimitivesFactory* fac = osgviz::OsgViz::getInstance()->getModuleInstance<osgviz::PrimitivesFactory>("PrimitivesFactory");
-    std::vector<osg::Vec3> osgPoints;
     
     for(const trajectory_follower::SubTrajectory& traj : p->data)
     {
+        std::vector<osg::Vec3> osgPoints;
         const base::geometry::Spline<3>& spline = traj.posSpline;
         double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
         for(double param = spline.getStartParam(); param <= spline.getEndParam(); param += stepSize )
@@ -44,11 +44,14 @@ void SubTrajectoryVisualization::updateMainNode ( osg::Node* node )
             const Eigen::Vector3d splinePoint = spline.getPoint(param);
             osgPoints.emplace_back(splinePoint.x(), splinePoint.y(), splinePoint.z());
         }
+        
+        osg::Vec4 currentColor = traj.kind == trajectory_follower::TRAJECTORY_KIND_RESCUE? rescueColor : color;
+        
+        auto prim = fac->createLinesNode(color, osgPoints);
+        geode->addChild(prim);
+        
     }
     
-    auto prim = fac->createLinesNode(color, osgPoints);
-    geode->addChild(prim);
-
     osg::StateSet* stateset = geode->getOrCreateStateSet();
     osg::LineWidth* linewidth = new osg::LineWidth();
     linewidth->setWidth(line_width);
@@ -68,10 +71,24 @@ void SubTrajectoryVisualization::setColor(QColor color)
     setDirty();
 }
 
+void SubTrajectoryVisualization::setRescueColor(QColor color)
+{
+    this->rescueColor = osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+    emit propertyChanged("RescueColor");
+    setDirty();
+}
+
 QColor SubTrajectoryVisualization::getColor() const
 {
     QColor c;
     c.setRgbF(color.x(), color.y(), color.z(), color.w());
+    return c;
+}
+
+QColor SubTrajectoryVisualization::getRescueColor() const
+{
+    QColor c;
+    c.setRgbF(rescueColor.x(), rescueColor.y(), rescueColor.z(), rescueColor.w());
     return c;
 }
 
