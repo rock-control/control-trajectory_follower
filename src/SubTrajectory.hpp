@@ -63,6 +63,8 @@ public:
      * */
     void interpolate(const std::vector< base::Pose2D >& poses, const std::vector< double >& orientationDiff);
 
+    void interpolateUsingTangents(const std::vector<base::Pose2D> &poses);
+
     /**
      * Returns the Pose2D for param d;
      * The Orientation NOT be normalized.
