@@ -32,7 +32,7 @@ void SubTrajectoryVisualization::updateMainNode ( osg::Node* node )
     geode = static_cast<osg::PositionAttitudeTransform*>(node);
     geode->removeChildren(0, geode->getNumChildren());
 
-    osgviz::PrimitivesFactory* fac = osgviz::OsgViz::getInstance()->getModuleInstance<osgviz::PrimitivesFactory>("PrimitivesFactory");
+    std::shared_ptr<osgviz::PrimitivesFactory> fac = osgviz::OsgViz::getInstance()->getModuleInstance<osgviz::PrimitivesFactory>("PrimitivesFactory");
     
     for(const trajectory_follower::SubTrajectory& traj : p->data)
     {
