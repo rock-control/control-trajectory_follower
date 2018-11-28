@@ -356,6 +356,11 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         ///< Sets limits on rotational velocity
         motionCmd.rotation = std::min(motionCmd.rotation,  followerConf.maxRotationalVelocity);
         motionCmd.rotation = std::max(motionCmd.rotation, -followerConf.maxRotationalVelocity);
+
+        if (followerConf.translationDependentOnRotationalVelocity)
+        {
+            motionCmd.translation *= 1.0 - fabs(motionCmd.rotation) / followerConf.maxRotationalVelocity;
+        }
     }
 
     followerData.cmd = motionCmd.toBaseMotion2D();

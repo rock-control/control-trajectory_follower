@@ -84,7 +84,7 @@ struct FollowerConfig
     ChainedControllerConfig chainedControllerConfig; ///< Config for
     ///< Chained controller
     SamsonControllerConfig samsonControllerConfig;
-    
+
     double dampingAngleUpperLimit;
     double maxRotationalVelocity; ///< Maximum rotational velocity, NaN if no limit is needed
     double pointTurnStart; ///< Angle error at which point turn starts
@@ -99,6 +99,7 @@ struct FollowerConfig
     double maxForwardLenght, maxBackwardLenght;
     double slamPoseErrorCheckEllipseX, slamPoseErrorCheckEllipseY;
     bool usePoseErrorReachedEndCheck;
+    bool translationDependentOnRotationalVelocity;
 
     FollowerConfig()
         : controllerType(CONTROLLER_UNKNOWN),
