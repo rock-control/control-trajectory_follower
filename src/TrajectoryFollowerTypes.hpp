@@ -116,7 +116,8 @@ struct FollowerConfig
           maxBackwardLenght(base::unset< double >()),
           slamPoseErrorCheckEllipseX(base::unset< double >()),
           slamPoseErrorCheckEllipseY(base::unset< double >()),
-          usePoseErrorReachedEndCheck(false)
+          usePoseErrorReachedEndCheck(false),
+          translationDependentOnRotationalVelocity(false)
     {
     }
 };
