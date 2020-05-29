@@ -26,7 +26,7 @@ public:
     
     static double angleLimit(double angle);
     
-    base::Trajectory toBaseTrajectory();
+    base::Trajectory toBaseTrajectory() const;
 
     /**
      * This method interpolates a point turn SubTrajectory

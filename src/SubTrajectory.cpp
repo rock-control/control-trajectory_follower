@@ -23,7 +23,7 @@ SubTrajectory::SubTrajectory()
     speed = 0.;
 }
 
-base::Trajectory SubTrajectory::toBaseTrajectory()
+base::Trajectory SubTrajectory::toBaseTrajectory() const
 {
     base::Trajectory tr;
     tr.spline = posSpline;
