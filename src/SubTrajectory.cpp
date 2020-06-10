@@ -21,9 +21,10 @@ SubTrajectory::SubTrajectory()
 {
     driveMode = ModeAckermann;
     speed = 0.;
+    kind = trajectory_follower::TRAJECTORY_KIND_NORMAL;
 }
 
-base::Trajectory SubTrajectory::toBaseTrajectory()
+base::Trajectory SubTrajectory::toBaseTrajectory() const
 {
     base::Trajectory tr;
     tr.spline = posSpline;
@@ -79,6 +80,88 @@ void SubTrajectory::interpolate(const std::vector< base::Pose2D >& poses, const 
     std::vector<double> params2;
     orientationSpline.interpolate(orientationLinearized, params2, params);
 }
+
+void SubTrajectory::interpolateUsingTangents(const std::vector< base::Pose2D >& poses)
+{
+    if(poses.size() < 2)
+        throw std::runtime_error("SubTrajectory::interpolate() given vector contains less than 2 points, interpolation is not possible");
+
+    startPose = poses.front();
+    goalPose = poses.back();
+
+    std::vector<base::Vector3d> posV;
+    std::vector<double> orientationLinearized;
+
+    double lastOrientation = base::NaN<double>();
+    int curOffset = 0;
+
+    std::vector<base::geometry::SplineBase::CoordinateType> types;
+
+    for(const base::Pose2D pose: poses)
+    {
+        double curOrientation = pose.orientation + curOffset * 2*M_PI;
+
+        
+        const Eigen::Vector3d curPos(pose.position.x(), pose.position.y(), 0.);
+        posV.push_back(curPos);
+        types.push_back(base::geometry::SplineBase::SplineBase::ORDINARY_POINT);
+
+        //linearize orientation
+        if(!base::isNaN<double>(lastOrientation))
+        {
+            double diff1;
+            double secondOri = pose.orientation;
+            int secOffset = curOffset;
+
+            //always take smaller diff
+            if(curOrientation > lastOrientation)
+            {
+                diff1 = curOrientation - lastOrientation;
+            }
+            else
+            {
+                diff1 = lastOrientation - curOrientation;
+            }
+
+            if(diff1 < 0)
+            {
+                secOffset = curOffset - 1;
+            }
+            else
+            {
+                secOffset = curOffset + 1;
+            }
+
+            secondOri = pose.orientation + (secOffset) * 2*M_PI;
+
+            double diff2 = fabs(secondOri - lastOrientation);
+            if(diff2 < diff1)
+            {
+                curOrientation = secondOri;
+                curOffset = secOffset;
+            }
+            else
+            {
+                //nothing to do, offset does not change
+            }
+        }
+
+        posV.push_back(curPos + Eigen::AngleAxisd(curOrientation, base::Vector3d::UnitZ()) * base::Vector3d::UnitX());
+        types.push_back(base::geometry::SplineBase::SplineBase::TANGENT_POINT_FOR_PRIOR);
+        
+        orientationLinearized.push_back(curOrientation);
+        lastOrientation = curOrientation;
+    }
+
+    std::vector<double> params;
+    posSpline.interpolate(posV, params, std::vector<double>(), types);
+
+    std::cout << "params: " << params.size() << " posv: " << posV.size() << std::endl;
+    
+    std::vector<double> params2;
+    orientationSpline.interpolate(orientationLinearized, params2, params);
+}
+
 
 void SubTrajectory::interpolate(const std::vector< base::Pose2D >& poses)
 {
@@ -173,6 +256,7 @@ SubTrajectory::SubTrajectory(const base::Trajectory& trajectory)
     startPose = getIntermediatePoint(posSpline.getStartParam());
     goalPose = getIntermediatePoint(posSpline.getEndParam());
     driveMode = ModeAckermann;
+    kind = trajectory_follower::TRAJECTORY_KIND_NORMAL;
 }
 
 double SubTrajectory::advance(double curveParam, double length)
@@ -187,6 +271,18 @@ double SubTrajectory::advance(double curveParam, double length)
         return getEndParam();
     }
 }
+
+std::pair< double, double > SubTrajectory::error(const Eigen::Vector2d& pos, double currentHeading, double curveParam)
+{
+    double heading = currentHeading;
+    if(!driveForward())
+        heading = angleLimit(currentHeading + M_PI);
+    double distanceError = posSpline.distanceError(Eigen::Vector3d(pos.x(), pos.y(), 0.), curveParam);
+    double headingError = posSpline.headingError(heading, curveParam);
+        
+    return std::make_pair(distanceError, headingError);
+}
+
 
 std::pair< double, double > SubTrajectory::error(const Eigen::Vector2d& pos, double currentHeading, double curveParam, double forwardDist)
 {

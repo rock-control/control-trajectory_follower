@@ -1,10 +1,20 @@
 rock_library(trajectory_follower
-    SOURCES TrajectoryFollower.cpp
-            SubTrajectory.cpp
-    HEADERS TrajectoryFollower.hpp
-            TrajectoryFollowerTypes.hpp
-            SubTrajectory.hpp
-            Motion2D.hpp
+    SOURCES
+        Controller.cpp
+        NoOrientationController.cpp
+        SamsonController.cpp
+        ChainedController.cpp
+        TrajectoryFollower.cpp
+        SubTrajectory.cpp
+    HEADERS 
+        Controller.hpp
+        NoOrientationController.hpp
+        SamsonController.hpp
+        ChainedController.hpp
+        TrajectoryFollower.hpp
+        TrajectoryFollowerTypes.hpp
+        SubTrajectory.hpp
+        Motion2D.hpp
     DEPS_PKGCONFIG
         eigen3
         base-types
