@@ -228,7 +228,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         return followerStatus;
     }
 
-    if (checkTurnOnSpot()) {
+    if (trajectory.driveMode != DriveMode::ModeSideways && checkTurnOnSpot()) {
         if ((angleError < -followerConf.pointTurnEnd
                 || angleError > followerConf.pointTurnEnd)
                 && std::signbit(lastAngleError) == std::signbit(angleError))
@@ -246,6 +246,20 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         }
     }
 
+   // Lateral driving
+    if (trajectory.driveMode == DriveMode::ModeSideways) {
+        double currentHeading = currentPose.getYaw();
+        base::Position2D vecToGoal = trajectory.getGoalPose().position - trajectory.getStartPose().position;
+        double goalHeading = atan2(vecToGoal[1], vecToGoal[0]);
+
+        motionCmd.translation = trajectory.getSpeed();
+        motionCmd.heading = goalHeading - currentHeading;
+        motionCmd.rotation = 0;
+
+        followerData.cmd = motionCmd.toBaseMotion2D();
+        return followerStatus;
+    } 
+    
     motionCmd = controller->update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
                                    trajectory.getVariationOfCurvature(currentCurveParameter));
 
