@@ -14,8 +14,11 @@ namespace vizkit3d
     Q_OBJECT
 
     Q_PROPERTY(double LineWidth READ getLineWidth WRITE setLineWidth)
-    Q_PROPERTY(QColor Color READ getColor WRITE setColor)
     Q_PROPERTY(QColor RescueColor READ getRescueColor WRITE setRescueColor)
+    Q_PROPERTY(QColor AckermannColor READ getAckermannColor WRITE setAckermannColor)
+    Q_PROPERTY(QColor TurnOnTheSpotColor READ getTurnOnTheSpotColor WRITE setTurnOnTheSpotColor)
+    Q_PROPERTY(QColor SidewaysColor READ getSidewaysColor WRITE setSidewaysColor)
+    Q_PROPERTY(QColor DiagonalColor READ getDiagonalColor WRITE setDiagonalColor)
 
     public:
         SubTrajectoryVisualization();
@@ -31,7 +34,14 @@ namespace vizkit3d
         QColor getColor() const;
         void setRescueColor(QColor color);
         QColor getRescueColor() const;
-        
+        void setAckermannColor(QColor color);
+        QColor getAckermannColor() const;
+        void setTurnOnTheSpotColor(QColor color);
+        QColor getTurnOnTheSpotColor() const;
+        void setSidewaysColor(QColor color);
+        QColor getSidewaysColor() const;
+        void setDiagonalColor(QColor color);
+        QColor getDiagonalColor() const;
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
@@ -43,8 +53,11 @@ namespace vizkit3d
         Data* p;
 
         double line_width;
-        osg::Vec4 color;       
-        osg::Vec4 rescueColor;
+        osg::Vec4 rescueColor,
+            ackermannColor,
+            turnOnTheSpotColor,
+            sidewaysColor,
+            diagonalColor;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> geode; 
     };
