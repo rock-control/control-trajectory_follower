@@ -92,8 +92,12 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     lastPose = currentPose;
     currentPose = robotPose;
 
+    std::cout << "Current Position: " << currentPose.position.x() << " " <<currentPose.position.y() << std::endl;
+
     // Gets the heading of the current pose
     double currentHeading = currentPose.getYaw();
+
+    std::cout << "Current Heading: " << currentPose.getYaw() << std::endl;
 
     // Change heading based on direction of motion
     if(!trajectory.driveForward())
@@ -128,21 +132,33 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     splineSegmentStartCurveParam = trajectory.advance(currentCurveParameter, -backwardLength);
     splineSegmentEndCurveParam = trajectory.advance(currentCurveParameter, forwardLength);
     splineSegmentGuessCurveParam = trajectory.advance(currentCurveParameter, dist);
-    
+
+    std::cout <<"Updating spline information for FollowerData" << std::endl;
+
     base::Pose2D splineStartPoint, splineEndPoint;
     splineStartPoint = trajectory.getIntermediatePoint(splineSegmentStartCurveParam);
     splineEndPoint = trajectory.getIntermediatePoint(splineSegmentEndCurveParam);
+
+    std::cout <<"Calculated spline start and end points" << std::endl;
+
+    std::cout <<"Spline start: " << splineStartPoint.position.x() << " " << splineStartPoint.position.y() << std::endl;
+    std::cout <<"Spline end: " << splineEndPoint.position.x() << " " << splineEndPoint.position.y() << std::endl;  
+
     followerData.splineSegmentStart.position.head<2>() = splineStartPoint.position;
     followerData.splineSegmentEnd.position.head<2>() = splineEndPoint.position;
     followerData.splineSegmentStart.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineStartPoint.orientation, Eigen::Vector3d::UnitZ()));
     followerData.splineSegmentEnd.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineEndPoint.orientation, Eigen::Vector3d::UnitZ()));
     
     currentCurveParameter = trajectory.posSpline.localClosestPointSearch(currentPose.position, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
-
+    std::cout << "Calculated current curver parameter " << std::endl;
     auto err = trajectory.error(currentPose.position.head<2>(), currentPose.getYaw(), currentCurveParameter);
+    std::cout << "Calculated error " << std::endl;
     distanceError = err.first;
     lastAngleError = angleError;
     angleError = err.second;
+
+    std::cout << "Angle Error " << angleError << std::endl;
+    std::cout << "Distance Error " << distanceError << std::endl;  
 }
 
 FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const base::Pose &robotPose)
@@ -155,6 +171,49 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
     if(followerStatus == TRAJECTORY_FINISHED) {
         LOG_INFO_S << "Trajectory follower not active";
         return followerStatus;
+    }
+    std::cout << "Starting to traverse " << std::endl; 
+    if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot)
+    {
+        double currentHeading = robotPose.getYaw();
+
+        if (currentHeading < 0)
+            currentHeading = 2*M_PI + currentHeading; 
+
+        double goalHeading    = trajectory.goalPose.orientation;
+        angleError            = currentHeading - goalHeading;
+
+        std::cout << "Current Heading " << currentHeading << std::endl;
+        std::cout << "Goal Heading " << goalHeading << std::endl;
+        std::cout << "Angle Error " << angleError << std::endl;
+
+        followerStatus        = EXEC_TURN_ON_SPOT;
+
+        if (angleError > 0 && ((2*M_PI - std::abs(angleError) > std::abs(angleError))))
+            pointTurnDirection = -1.;
+        else
+        if (angleError > 0 && ((2*M_PI - std::abs(angleError) < std::abs(angleError))))
+            pointTurnDirection = 1.;
+        else 
+        if (angleError < 0 && ((2*M_PI - std::abs(angleError) > std::abs(angleError))))
+            pointTurnDirection = 1.;
+        else
+        if (angleError < 0 && ((2*M_PI - std::abs(angleError) < std::abs(angleError))))        
+            pointTurnDirection = -1.;
+
+        if ((angleError < - 0.05 || angleError > 0.05))
+        {
+            motionCmd.rotation = pointTurnDirection * followerConf.pointTurnVelocity;
+            followerData.cmd = motionCmd.toBaseMotion2D();
+            return followerStatus;
+        }
+        else
+        {
+            std::cout << "Finished Point-turn" << std::endl;
+            pointTurnDirection = 1.;
+            followerStatus = TRAJECTORY_FINISHED;
+            return followerStatus;
+        }
     }
 
     if (!base::isUnset<double>(followerConf.slamPoseErrorCheckEllipseX) && !base::isUnset<double>(followerConf.slamPoseErrorCheckEllipseY)) {
@@ -178,17 +237,22 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
             followerStatus = lastFollowerStatus;
         }
     }
-
+    std::cout << "Starting to compute errors " << std::endl;
     computeErrors(robotPose);
+    std::cout << "Computed errors " << std::endl;
 
     followerData.angleError = angleError;
     followerData.distanceError = distanceError;
+
+    std::cout << "Angle error: " << angleError << std::endl;
+    std::cout << "Distance error: " << distanceError << std::endl;
 
     followerData.currentPose.position = currentPose.position;
     followerData.currentPose.orientation = currentPose.orientation;
     base::Pose2D refPose = trajectory.getIntermediatePoint(currentCurveParameter);
     followerData.splineReference.position = Eigen::Vector3d(refPose.position.x(), refPose.position.y(), 0.);
     followerData.splineReference.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(refPose.orientation, Eigen::Vector3d::UnitZ()));
+    std::cout << "Finished setting FollowerData" << std::endl;
 
     double distanceToEnd = trajectory.getDistToGoal(currentCurveParameter);
     lastPosError = posError;
