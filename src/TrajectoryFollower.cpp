@@ -175,33 +175,34 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
     std::cout << "Starting to traverse " << std::endl; 
     if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot)
     {
-        double currentHeading = robotPose.getYaw();
+        double actualHeading = robotPose.getYaw();
+        double targetHeading = trajectory.goalPose.orientation;
 
-        if (currentHeading < 0)
-            currentHeading = 2*M_PI + currentHeading; 
+        if (actualHeading < 0)
+            actualHeading = 2*M_PI + actualHeading; 
 
-        double goalHeading    = trajectory.goalPose.orientation;
-        angleError            = currentHeading - goalHeading;
+        double error       = actualHeading - targetHeading;
 
-        std::cout << "Current Heading " << currentHeading << std::endl;
-        std::cout << "Goal Heading " << goalHeading << std::endl;
-        std::cout << "Angle Error " << angleError << std::endl;
+        Eigen::AngleAxisd currentAxisRot(actualHeading,Eigen::Vector3d::UnitZ());
+        Eigen::AngleAxisd targetAxisRot(targetHeading,Eigen::Vector3d::UnitZ());
+        Eigen::Vector3d currentRot = currentAxisRot * Eigen::Vector3d::UnitX();
+        Eigen::Vector3d desiredRot = targetAxisRot  * Eigen::Vector3d::UnitX();  
+        Eigen::Vector3d cross      = currentRot.cross(desiredRot).normalized();
+
+        std::cout << "Current Heading " << actualHeading << std::endl;
+        std::cout << "Goal Heading "    << targetHeading << std::endl;
+        std::cout << "Error  "          << error     << std::endl;
 
         followerStatus        = EXEC_TURN_ON_SPOT;
 
-        if (angleError > 0 && ((2*M_PI - std::abs(angleError) > std::abs(angleError))))
-            pointTurnDirection = -1.;
-        else
-        if (angleError > 0 && ((2*M_PI - std::abs(angleError) < std::abs(angleError))))
-            pointTurnDirection = 1.;
-        else 
-        if (angleError < 0 && ((2*M_PI - std::abs(angleError) > std::abs(angleError))))
-            pointTurnDirection = 1.;
-        else
-        if (angleError < 0 && ((2*M_PI - std::abs(angleError) < std::abs(angleError))))        
-            pointTurnDirection = -1.;
+        std::cout << "Cross.z " << cross.z() << std::endl;
 
-        if ((angleError < - 0.05 || angleError > 0.05))
+        if (cross.z() == -1)
+            pointTurnDirection = -1.;
+        else
+            pointTurnDirection =  1.;
+
+        if ((error < - 0.05 || error > 0.05))
         {
             motionCmd.rotation = pointTurnDirection * followerConf.pointTurnVelocity;
             followerData.cmd = motionCmd.toBaseMotion2D();
@@ -347,6 +348,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
 
 bool TrajectoryFollower::checkTurnOnSpot()
 {
+    return false;
     if (pointTurn)
         return true;
 
