@@ -8,7 +8,7 @@ using namespace trajectory_follower;
 TrajectoryFollower::TrajectoryFollower()
     : configured(false),
       controllerType(CONTROLLER_UNKNOWN ),
-      pointTurn(false),
+      automaticPointTurn(false),
       pointTurnDirection(1.)
 {
     followerStatus = TRAJECTORY_FINISHED;
@@ -19,7 +19,7 @@ TrajectoryFollower::TrajectoryFollower()
 TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
     : configured(false),
       controllerType(followerConfig.controllerType),
-      pointTurn(false),
+      automaticPointTurn(false),
       pointTurnDirection(1.),
       followerConf(followerConfig)
 {
@@ -173,7 +173,13 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         return followerStatus;
     }
     std::cout << "Starting to traverse " << std::endl; 
-    if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot)
+
+    /*
+        Here we need to differentiate whether the DriveMode::ModeTurnOnTheSpot is set by the automatic point turn feature of trajectory follower
+        or the DriveMode::ModeTurnOnTheSpot is actually required by the planner as part of the planned trajectory 
+    */  
+
+    if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot && automaticPointTurn == false) 
     {
         double actualHeading = robotPose.getYaw();
         double targetHeading = trajectory.goalPose.orientation;
@@ -305,7 +311,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         else
         {
             std::cout << "stopped Point-Turn. Switching to normal controller" << std::endl;
-            pointTurn = false;
+            automaticPointTurn = false;
             pointTurnDirection = 1.;
             followerStatus = TRAJECTORY_FOLLOWING;
         }
@@ -348,14 +354,13 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
 
 bool TrajectoryFollower::checkTurnOnSpot()
 {
-    return false;
-    if (pointTurn)
+    if (automaticPointTurn)
         return true;
 
     if(!(angleError > -followerConf.pointTurnStart && angleError < followerConf.pointTurnStart))
     {
         std::cout << "robot orientation : OUT OF BOUND ["  << angleError << ", " << followerConf.pointTurnStart << "]. starting point-turn" << std::endl;
-        pointTurn = true;
+        automaticPointTurn = true;
         followerStatus = EXEC_TURN_ON_SPOT;
         this->trajectory.driveMode = ModeTurnOnTheSpot;
 
