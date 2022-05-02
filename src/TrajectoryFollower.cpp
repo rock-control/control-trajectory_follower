@@ -195,13 +195,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         Eigen::Vector3d desiredRot = targetAxisRot  * Eigen::Vector3d::UnitX();  
         Eigen::Vector3d cross      = currentRot.cross(desiredRot).normalized();
 
-        std::cout << "Current Heading " << actualHeading << std::endl;
-        std::cout << "Goal Heading "    << targetHeading << std::endl;
-        std::cout << "Error  "          << error     << std::endl;
-
         followerStatus        = EXEC_TURN_ON_SPOT;
-
-        std::cout << "Cross.z " << cross.z() << std::endl;
 
         if (cross.z() == -1)
             pointTurnDirection = -1.;
