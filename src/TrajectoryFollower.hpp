@@ -34,6 +34,12 @@ public:
     void setNewTrajectory(const SubTrajectory &trajectory, const base::Pose& robotPose);
 
     /**
+     * @brief Here we set the heading error tolerance for the orientation alignment for planner defined point-turns
+     * 
+     */
+    void setHeadingErrorTolerance(const double tolerance);
+
+    /**
      * Marks the current trajectory as traversed
      *
      * Stops the current trajectory following and removes the trajectory
@@ -64,6 +70,7 @@ private:
     ControllerType controllerType;
     bool automaticPointTurn;
     double pointTurnDirection;
+    double headingErrorTolerance;
     bool nearEnd;
     double dampingCoefficient;
     base::Pose currentPose;

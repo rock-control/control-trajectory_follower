@@ -11,6 +11,7 @@ TrajectoryFollower::TrajectoryFollower()
       automaticPointTurn(false),
       pointTurnDirection(1.)
 {
+    headingErrorTolerance = 0.05;
     followerStatus = TRAJECTORY_FINISHED;
     nearEnd = false;
     splineReferenceErrorCoefficient = 0.;
@@ -23,6 +24,7 @@ TrajectoryFollower::TrajectoryFollower(const FollowerConfig& followerConfig)
       pointTurnDirection(1.),
       followerConf(followerConfig)
 {
+    headingErrorTolerance = followerConf.headingErrorTolerance;
     followerStatus = TRAJECTORY_FINISHED;
     dampingCoefficient = base::unset< double >();
 
@@ -85,6 +87,11 @@ void TrajectoryFollower::setNewTrajectory(const SubTrajectory &trajectory, const
     followerData.currentTrajectory.push_back(this->trajectory);
 
     followerStatus = TRAJECTORY_FOLLOWING;
+}
+
+void TrajectoryFollower::setHeadingErrorTolerance(const double tolerance)
+{
+    headingErrorTolerance = tolerance;
 }
 
 void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
@@ -172,11 +179,12 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         LOG_INFO_S << "Trajectory follower not active";
         return followerStatus;
     }
-    std::cout << "Starting to traverse " << std::endl; 
+    std::cout << "Starting to traverse trajectory." << std::endl; 
 
     /*
-        Here we need to differentiate whether the DriveMode::ModeTurnOnTheSpot is set by the automatic point turn feature of trajectory follower
-        or the DriveMode::ModeTurnOnTheSpot is actually required by the planner as part of the planned trajectory 
+        Here we need to differentiate whether the DriveMode::ModeTurnOnTheSpot is set by the 
+        automatic point turn feature of trajectory follower or the DriveMode::ModeTurnOnTheSpot
+        is actually required by the planner as part of the planned trajectory 
     */  
 
     if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot && automaticPointTurn == false) 
@@ -202,7 +210,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         else
             pointTurnDirection =  1.;
 
-        if ((error < - 0.05 || error > 0.05))
+        if ((error < -headingErrorTolerance || error > headingErrorTolerance))
         {
             motionCmd.rotation = pointTurnDirection * followerConf.pointTurnVelocity;
             followerData.cmd = motionCmd.toBaseMotion2D();

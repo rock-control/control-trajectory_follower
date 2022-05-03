@@ -52,6 +52,7 @@ struct FollowerConfig
     double pointTurnStart; ///< Angle error at which point turn starts
     double pointTurnEnd;   ///< Angle error at which point turn, once started, stops
     double pointTurnVelocity; ///< Point turn velocity
+    double headingErrorTolerance; //Heading error tolerance for orientation alignment
     double geometricResolution; ///< Geometric resolution to be used
     double trajectoryFinishDistance; ///< Minimum distance to end point
     ///< of trajectory for considering it
@@ -69,6 +70,7 @@ struct FollowerConfig
           pointTurnStart(base::unset< double >()),
           pointTurnEnd(base::unset< double >()),
           pointTurnVelocity(base::unset< double >()),
+          headingErrorTolerance(0.05),
           geometricResolution(0.001),
           trajectoryFinishDistance(base::unset< double >()),
           splineReferenceError(base::unset< double >()),
