@@ -1,3 +1,4 @@
+rock_find_qt5(Core)
 rock_vizkit_plugin(trajectory_follower-viz
     SubTrajectoryVisualization.cpp
     DEPS trajectory_follower
