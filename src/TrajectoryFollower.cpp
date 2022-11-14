@@ -144,7 +144,7 @@ void TrajectoryFollower::computeErrors(const base::Pose& robotPose)
     followerData.splineSegmentEnd.position.head<2>() = splineEndPoint.position;
     followerData.splineSegmentStart.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineStartPoint.orientation, Eigen::Vector3d::UnitZ()));
     followerData.splineSegmentEnd.orientation = Eigen::Quaterniond(Eigen::AngleAxisd(splineEndPoint.orientation, Eigen::Vector3d::UnitZ()));
-    
+
     currentCurveParameter = trajectory.posSpline.localClosestPointSearch(currentPose.position, splineSegmentGuessCurveParam, splineSegmentStartCurveParam, splineSegmentEndCurveParam);
     auto err = trajectory.error(currentPose.position.head<2>(), currentPose.getYaw(), currentCurveParameter);
     distanceError = err.first;
@@ -165,25 +165,26 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
     }
 
     /*
-        Here we need to differentiate whether the DriveMode::ModeTurnOnTheSpot is set by the 
+        Here we need to differentiate whether the DriveMode::ModeTurnOnTheSpot is set by the
         automatic point turn feature of trajectory follower or the DriveMode::ModeTurnOnTheSpot
-        is actually required by the planner as part of the planned trajectory 
-    */  
+        is actually required by the planner as part of the planned trajectory
+    */
 
-    if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot && automaticPointTurn == false) 
+    if (trajectory.driveMode == DriveMode::ModeTurnOnTheSpot && automaticPointTurn == false)
     {
         double actualHeading = robotPose.getYaw();
         double targetHeading = trajectory.goalPose.orientation;
 
         if (actualHeading < 0)
-            actualHeading = 2*M_PI + actualHeading; 
-
+            actualHeading = 2*M_PI + actualHeading;
+        if (targetHeading < 0)
+            targetHeading = 2*M_PI + targetHeading;
         double error       = actualHeading - targetHeading;
 
         Eigen::AngleAxisd currentAxisRot(actualHeading,Eigen::Vector3d::UnitZ());
         Eigen::AngleAxisd targetAxisRot(targetHeading,Eigen::Vector3d::UnitZ());
         Eigen::Vector3d currentRot = currentAxisRot * Eigen::Vector3d::UnitX();
-        Eigen::Vector3d desiredRot = targetAxisRot  * Eigen::Vector3d::UnitX();  
+        Eigen::Vector3d desiredRot = targetAxisRot  * Eigen::Vector3d::UnitX();
         Eigen::Vector3d cross      = currentRot.cross(desiredRot).normalized();
 
         followerStatus        = EXEC_TURN_ON_SPOT;
@@ -306,8 +307,8 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
 
         followerData.cmd = motionCmd.toBaseMotion2D();
         return followerStatus;
-    } 
-    
+    }
+
     motionCmd = controller->update(trajectory.getSpeed(), distanceError, angleError, trajectory.getCurvature(currentCurveParameter),
                                    trajectory.getVariationOfCurvature(currentCurveParameter));
 
