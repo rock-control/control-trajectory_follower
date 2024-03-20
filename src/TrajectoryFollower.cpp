@@ -175,11 +175,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         double actualHeading = robotPose.getYaw();
         double targetHeading = trajectory.goalPose.orientation;
 
-        if (actualHeading < 0)
-            actualHeading = 2*M_PI + actualHeading;
-        if (targetHeading < 0)
-            targetHeading = 2*M_PI + targetHeading;
-        double error       = actualHeading - targetHeading;
+        const double error = base::Angle::normalizeRad(actualHeading - targetHeading);
 
         Eigen::AngleAxisd currentAxisRot(actualHeading,Eigen::Vector3d::UnitZ());
         Eigen::AngleAxisd targetAxisRot(targetHeading,Eigen::Vector3d::UnitZ());
@@ -194,7 +190,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
         else
             pointTurnDirection =  1.;
 
-        if ((error < -headingErrorTolerance || error > headingErrorTolerance))
+        if ( fabs(error) > headingErrorTolerance )
         {
             motionCmd.rotation = pointTurnDirection * followerConf.pointTurnVelocity;
             followerData.cmd = motionCmd.toBaseMotion2D();
@@ -219,7 +215,7 @@ FollowerStatus TrajectoryFollower::traverseTrajectory(Motion2D &motionCmd, const
 
         if (!(slamPoseCheckVal <= 1.)) {
             if (followerStatus != SLAM_POSE_CHECK_FAILED) {
-                std::cout << "SLAM_POSE_CHECK_FAILED! slamPoseCheckVal is " << slamPoseCheckVal << std::endl;
+                LOG_WARN_S << "SLAM_POSE_CHECK_FAILED! slamPoseCheckVal is " << slamPoseCheckVal << '\n';
                 lastFollowerStatus = followerStatus;
                 followerStatus = SLAM_POSE_CHECK_FAILED;
             }

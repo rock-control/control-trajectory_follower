@@ -25,7 +25,7 @@ public:
      * Before using the follower make sure that the object is created
      * using the correct config and this constructor, otherwise the
      * controller will cause runtime error */
-    TrajectoryFollower(const FollowerConfig& followerConfig);
+    explicit TrajectoryFollower(const FollowerConfig& followerConfig);
 
     /** Sets a new trajectory
      *
