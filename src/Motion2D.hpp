@@ -58,6 +58,7 @@ struct Motion2D {
         base::commands::Motion2D cmd;
         cmd.rotation = this->rotation;
         cmd.translation = this->translation;
+        cmd.heading = base::Angle::fromRad(this->heading);
         return cmd;
     }
     

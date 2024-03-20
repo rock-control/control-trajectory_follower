@@ -25,13 +25,19 @@ public:
      * Before using the follower make sure that the object is created
      * using the correct config and this constructor, otherwise the
      * controller will cause runtime error */
-    TrajectoryFollower(const FollowerConfig& followerConfig);
+    explicit TrajectoryFollower(const FollowerConfig& followerConfig);
 
     /** Sets a new trajectory
      *
      * Here it checks for the initial stability of the trajectory
      */
     void setNewTrajectory(const SubTrajectory &trajectory, const base::Pose& robotPose);
+
+    /**
+     * @brief Here we set the heading error tolerance for the orientation alignment for planner defined point-turns
+     * 
+     */
+    void setHeadingErrorTolerance(const double tolerance);
 
     /**
      * Marks the current trajectory as traversed
@@ -62,8 +68,9 @@ public:
 private:
     bool configured;
     ControllerType controllerType;
-    bool pointTurn;
+    bool automaticPointTurn;
     double pointTurnDirection;
+    double headingErrorTolerance;
     bool nearEnd;
     double dampingCoefficient;
     base::Pose currentPose;
