@@ -191,6 +191,7 @@ void SubTrajectoryVisualization::setLineWidth(double line_width)
     emit propertyChanged("LineWidth");
 }
 
-
-//Macro that makes this plugin loadable in ruby, this is optional.
-VizkitQtPlugin(SubTrajectoryVisualization)
+namespace vizkit3d
+{
+    VizkitQtPluginImpl(SubTrajectoryVisualization)
+}
